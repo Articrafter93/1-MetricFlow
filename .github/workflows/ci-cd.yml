@@ -20,7 +20,7 @@ jobs:
       - run: npm run build
 
   deploy:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != ''
     needs: quality
     runs-on: ubuntu-latest
     steps:

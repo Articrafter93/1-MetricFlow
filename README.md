@@ -30,6 +30,7 @@ Usa `.env.example` como base:
 DATABASE_URL="postgresql://metricflow:metricflow@localhost:5432/metricflow?schema=public"
 NEXTAUTH_SECRET="replace-with-strong-secret"
 NEXTAUTH_URL="http://localhost:3000"
+MOCK_DB_ENABLED="false"
 SMTP_HOST=""
 SMTP_PORT="587"
 SMTP_USER=""
@@ -45,6 +46,14 @@ MAIL_FROM=""
 4. `npm run db:push`
 5. `npm run db:seed`
 6. `npm run dev`
+
+## Modo Mock DB (temporal)
+
+Si no hay base de datos productiva disponible, se puede activar modo mock:
+
+- Define `MOCK_DB_ENABLED="true"` en Vercel (production).
+- Omite `DATABASE_URL` temporalmente.
+- El sistema usa usuarios demo en memoria para auth/RBAC y métricas sintéticas.
 
 ## Desarrollo local (Docker Compose)
 
@@ -72,7 +81,8 @@ MAIL_FROM=""
 Workflow en `.github/workflows/ci-cd.yml`:
 
 1. Ejecuta `npm ci`, `npm run lint`, `npm run build`.
-2. En `main`, despliega a Vercel usando secretos:
+2. En `main`, despliega por `Git Integration` de Vercel (repo conectado).
+3. Opcionalmente, si existen secretos en GitHub, tambien ejecuta deploy por CLI:
    - `VERCEL_TOKEN`
    - `VERCEL_ORG_ID`
    - `VERCEL_PROJECT_ID`

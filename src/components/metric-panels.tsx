@@ -35,12 +35,27 @@ const ranges = [
 export function MetricPanels({ workspaceName, role, initialData }: MetricPanelsProps) {
   const [days, setDays] = useState(30);
   const [data, setData] = useState<MetricsResponse>(initialData);
+  const [mounted, setMounted] = useState(false);
   const [expandedCard, setExpandedCard] = useState<"mrr" | "funnel" | "retention" | null>(
     null,
   );
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setMounted(true);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) {
+      return;
+    }
+
     let cancelled = false;
 
     async function fetchMetrics() {
@@ -66,7 +81,7 @@ export function MetricPanels({ workspaceName, role, initialData }: MetricPanelsP
       cancelled = true;
       clearInterval(interval);
     };
-  }, [days]);
+  }, [days, mounted]);
 
   const deltas = useMemo(
     () => ({
@@ -76,6 +91,7 @@ export function MetricPanels({ workspaceName, role, initialData }: MetricPanelsP
     }),
     [data],
   );
+  const integerFormatter = useMemo(() => new Intl.NumberFormat("en-US"), []);
 
   return (
     <section className="space-y-6">
@@ -113,7 +129,7 @@ export function MetricPanels({ workspaceName, role, initialData }: MetricPanelsP
           onClick={() => setExpandedCard(expandedCard === "mrr" ? null : "mrr")}
         >
           <p className="metric-label">MRR</p>
-          <p className="metric-value">${Math.round(data.summary.mrr).toLocaleString()}</p>
+          <p className="metric-value">${integerFormatter.format(Math.round(data.summary.mrr))}</p>
           <p className="metric-delta">{deltas.mrr}</p>
         </button>
 
@@ -149,64 +165,70 @@ export function MetricPanels({ workspaceName, role, initialData }: MetricPanelsP
           expandedCard ? "max-h-[640px] opacity-100" : "max-h-0 opacity-0",
         )}
       >
-        <div className="glass-panel grid gap-4 p-4 lg:grid-cols-2">
-          <div className="h-64">
-            <p className="mb-2 text-sm text-slate-300">MRR timeline</p>
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={data.points}>
-                <defs>
-                  <linearGradient id="mrrGradient" x1="0" x2="0" y1="0" y2="1">
-                    <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.6} />
-                    <stop offset="95%" stopColor="#38bdf8" stopOpacity={0.05} />
-                  </linearGradient>
-                </defs>
-                <CartesianGrid stroke="#223147" strokeDasharray="4 4" />
-                <XAxis dataKey="date" stroke="#8ca0ba" tick={{ fontSize: 11 }} />
-                <YAxis stroke="#8ca0ba" tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="mrr"
-                  stroke="#38bdf8"
-                  fillOpacity={1}
-                  fill="url(#mrrGradient)"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
+        {!mounted ? (
+          <div className="glass-panel p-4 text-sm text-slate-400">
+            Cargando graficas...
           </div>
+        ) : expandedCard ? (
+          <div className="glass-panel grid gap-4 p-4 lg:grid-cols-2">
+            <div className="h-64">
+              <p className="mb-2 text-sm text-slate-300">MRR timeline</p>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data.points}>
+                  <defs>
+                    <linearGradient id="mrrGradient" x1="0" x2="0" y1="0" y2="1">
+                      <stop offset="5%" stopColor="#38bdf8" stopOpacity={0.6} />
+                      <stop offset="95%" stopColor="#38bdf8" stopOpacity={0.05} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid stroke="#223147" strokeDasharray="4 4" />
+                  <XAxis dataKey="date" stroke="#8ca0ba" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#8ca0ba" tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Area
+                    type="monotone"
+                    dataKey="mrr"
+                    stroke="#38bdf8"
+                    fillOpacity={1}
+                    fill="url(#mrrGradient)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
 
-          <div className="h-64">
-            <p className="mb-2 text-sm text-slate-300">Embudo por dia</p>
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data.points}>
-                <CartesianGrid stroke="#223147" strokeDasharray="4 4" />
-                <XAxis dataKey="date" stroke="#8ca0ba" tick={{ fontSize: 11 }} />
-                <YAxis stroke="#8ca0ba" tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Legend />
-                <Bar dataKey="visits" fill="#334155" />
-                <Bar dataKey="leads" fill="#06b6d4" />
-                <Bar dataKey="deals" fill="#22c55e" />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
+            <div className="h-64">
+              <p className="mb-2 text-sm text-slate-300">Embudo por dia</p>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={data.points}>
+                  <CartesianGrid stroke="#223147" strokeDasharray="4 4" />
+                  <XAxis dataKey="date" stroke="#8ca0ba" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#8ca0ba" tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="visits" fill="#334155" />
+                  <Bar dataKey="leads" fill="#06b6d4" />
+                  <Bar dataKey="deals" fill="#22c55e" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
 
-          <div className="h-64 lg:col-span-2">
-            <p className="mb-2 text-sm text-slate-300">Retencion y churn</p>
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={data.points}>
-                <CartesianGrid stroke="#223147" strokeDasharray="4 4" />
-                <XAxis dataKey="date" stroke="#8ca0ba" tick={{ fontSize: 11 }} />
-                <YAxis stroke="#8ca0ba" tick={{ fontSize: 11 }} />
-                <Tooltip />
-                <Legend />
-                <Line type="monotone" dataKey="retention" stroke="#22d3ee" dot={false} />
-                <Line type="monotone" dataKey="conversion" stroke="#fbbf24" dot={false} />
-                <Line type="monotone" dataKey="churn" stroke="#f43f5e" dot={false} />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="h-64 lg:col-span-2">
+              <p className="mb-2 text-sm text-slate-300">Retencion y churn</p>
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={data.points}>
+                  <CartesianGrid stroke="#223147" strokeDasharray="4 4" />
+                  <XAxis dataKey="date" stroke="#8ca0ba" tick={{ fontSize: 11 }} />
+                  <YAxis stroke="#8ca0ba" tick={{ fontSize: 11 }} />
+                  <Tooltip />
+                  <Legend />
+                  <Line type="monotone" dataKey="retention" stroke="#22d3ee" dot={false} />
+                  <Line type="monotone" dataKey="conversion" stroke="#fbbf24" dot={false} />
+                  <Line type="monotone" dataKey="churn" stroke="#f43f5e" dot={false} />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
-        </div>
+        ) : null}
       </div>
 
       {loading ? <p className="text-xs text-slate-400">Actualizando metricas en vivo...</p> : null}

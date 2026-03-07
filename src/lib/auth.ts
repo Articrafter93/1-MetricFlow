@@ -5,6 +5,8 @@ import { type NextAuthOptions, getServerSession } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import { z } from "zod";
 import { prisma } from "@/lib/db";
+import { getMockMembershipByUserId, getMockUserByEmail } from "@/lib/mock-data";
+import { isMockDatabaseEnabled } from "@/lib/runtime-mode";
 
 const credentialsSchema = z.object({
   email: z.string().email(),
@@ -12,11 +14,11 @@ const credentialsSchema = z.object({
 });
 
 export const authOptions: NextAuthOptions = {
-  adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   pages: {
     signIn: "/sign-in",
   },
+  ...(isMockDatabaseEnabled() ? {} : { adapter: PrismaAdapter(prisma) }),
   providers: [
     CredentialsProvider({
       name: "Email and Password",
@@ -29,6 +31,19 @@ export const authOptions: NextAuthOptions = {
 
         if (!parsed.success) {
           return null;
+        }
+
+        if (isMockDatabaseEnabled()) {
+          const mockUser = getMockUserByEmail(parsed.data.email);
+          if (!mockUser || parsed.data.password !== mockUser.password) {
+            return null;
+          }
+
+          return {
+            id: mockUser.id,
+            email: mockUser.email,
+            name: mockUser.name,
+          };
         }
 
         const user = await prisma.user.findUnique({
@@ -65,17 +80,26 @@ export const authOptions: NextAuthOptions = {
   callbacks: {
     async jwt({ token, user }) {
       if (user?.id) {
-        const membership = await prisma.membership.findFirst({
-          where: { userId: user.id },
-          include: { workspace: true },
-          orderBy: { createdAt: "asc" },
-        });
-
         token.userId = user.id;
-        token.role = membership?.role;
-        token.workspaceId = membership?.workspaceId;
-        token.workspaceSlug = membership?.workspace.slug;
-        token.workspaceName = membership?.workspace.name;
+
+        if (isMockDatabaseEnabled()) {
+          const membership = getMockMembershipByUserId(user.id);
+          token.role = membership?.role;
+          token.workspaceId = membership?.workspaceId;
+          token.workspaceSlug = membership?.workspaceSlug;
+          token.workspaceName = membership?.workspaceName;
+        } else {
+          const membership = await prisma.membership.findFirst({
+            where: { userId: user.id },
+            include: { workspace: true },
+            orderBy: { createdAt: "asc" },
+          });
+
+          token.role = membership?.role;
+          token.workspaceId = membership?.workspaceId;
+          token.workspaceSlug = membership?.workspace.slug;
+          token.workspaceName = membership?.workspace.name;
+        }
       }
 
       return token;

@@ -1,5 +1,6 @@
 import { subDays } from "date-fns";
 import { prisma } from "@/lib/db";
+import { isMockDatabaseEnabled } from "@/lib/runtime-mode";
 
 export type MetricPoint = {
   date: string;
@@ -22,14 +23,31 @@ export type MetricsResponse = {
   };
 };
 
-function sampleMetrics(days: number): MetricsResponse {
+function deterministicNoise(seed: string, min: number, max: number) {
+  let hash = 0;
+  for (let index = 0; index < seed.length; index += 1) {
+    hash = (hash * 31 + seed.charCodeAt(index)) >>> 0;
+  }
+
+  const normalized = hash / 4294967295;
+  return min + normalized * (max - min);
+}
+
+function sampleMetrics(workspaceId: string, days: number): MetricsResponse {
   const points: MetricPoint[] = Array.from({ length: days }).map((_, index) => {
     const day = subDays(new Date(), days - index - 1);
-    const visits = 1200 + index * 25 + Math.round(Math.random() * 200);
+    const visits =
+      1200 +
+      index * 25 +
+      Math.round(deterministicNoise(`${workspaceId}-${index}-visits`, 10, 220));
     const leads = Math.round(visits * 0.12);
     const deals = Math.round(leads * 0.24);
-    const mrr = 20000 + index * 45 + Math.round(Math.random() * 500);
-    const retention = 0.9 + (Math.random() * 0.05 - 0.015);
+    const mrr =
+      20000 +
+      index * 45 +
+      Math.round(deterministicNoise(`${workspaceId}-${index}-mrr`, 20, 560));
+    const retention =
+      0.9 + deterministicNoise(`${workspaceId}-${index}-retention`, -0.015, 0.035);
     const conversion = leads > 0 ? deals / leads : 0;
     const churn = 1 - retention;
 
@@ -64,6 +82,11 @@ export async function getWorkspaceMetrics(
   days: number,
 ): Promise<MetricsResponse> {
   const safeDays = Math.max(7, Math.min(days, 365));
+
+  if (isMockDatabaseEnabled()) {
+    return sampleMetrics(workspaceId, safeDays);
+  }
+
   const startDate = subDays(new Date(), safeDays - 1);
 
   const snapshots = await prisma.metricSnapshot.findMany({
@@ -85,7 +108,7 @@ export async function getWorkspaceMetrics(
   });
 
   if (snapshots.length === 0) {
-    return sampleMetrics(safeDays);
+    return sampleMetrics(workspaceId, safeDays);
   }
 
   const points: MetricPoint[] = snapshots.map((snapshot) => ({

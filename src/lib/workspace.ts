@@ -2,12 +2,31 @@ import { Role } from "@prisma/client";
 import { redirect } from "next/navigation";
 import { getAuthSession } from "@/lib/auth";
 import { prisma } from "@/lib/db";
+import { getMockMembershipByUserId } from "@/lib/mock-data";
+import { isMockDatabaseEnabled } from "@/lib/runtime-mode";
 
 export async function getWorkspaceContext() {
   const session = await getAuthSession();
 
   if (!session?.user?.id) {
     return null;
+  }
+
+  if (isMockDatabaseEnabled()) {
+    const mockMembership = getMockMembershipByUserId(session.user.id);
+    if (!mockMembership) {
+      return null;
+    }
+
+    return {
+      userId: session.user.id,
+      email: session.user.email ?? mockMembership.email,
+      role: session.user.role ?? mockMembership.role,
+      workspaceId: session.user.workspaceId ?? mockMembership.workspaceId,
+      workspaceName: session.user.workspaceName ?? mockMembership.workspaceName,
+      workspaceSlug: session.user.workspaceSlug ?? mockMembership.workspaceSlug,
+      workspaceLogoUrl: mockMembership.workspaceLogoUrl,
+    };
   }
 
   const membership = await prisma.membership.findFirst({

@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { sendInviteEmail } from "@/lib/mailer";
 import { prisma } from "@/lib/db";
+import { isMockDatabaseEnabled } from "@/lib/runtime-mode";
 import { getWorkspaceContext } from "@/lib/workspace";
 
 const inviteSchema = z.object({
@@ -37,6 +38,28 @@ export async function POST(request: NextRequest) {
 
   const token = crypto.randomBytes(32).toString("hex");
   const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 3);
+  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+  const inviteUrl = `${baseUrl}/sign-in?invite=${token}`;
+
+  if (isMockDatabaseEnabled()) {
+    let sentEmail = false;
+    if (parsed.data.sendEmail) {
+      const sent = await sendInviteEmail({
+        to: parsed.data.email.toLowerCase(),
+        workspaceName: context.workspaceName,
+        role: parsed.data.role,
+        inviteUrl,
+      });
+      sentEmail = sent.sent;
+    }
+
+    return NextResponse.json({
+      inviteUrl,
+      expiresAt,
+      sentEmail,
+      mode: "mock",
+    });
+  }
 
   const invite = await prisma.teamInvite.create({
     data: {
@@ -48,9 +71,6 @@ export async function POST(request: NextRequest) {
       expiresAt,
     },
   });
-
-  const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
-  const inviteUrl = `${baseUrl}/sign-in?invite=${invite.token}`;
 
   let sentEmail = false;
   if (parsed.data.sendEmail) {

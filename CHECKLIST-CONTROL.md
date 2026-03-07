@@ -1,7 +1,7 @@
 # CHECKLIST DE CONTROL - METRICFLOW
 
 > Ruta del proyecto: `C:\Users\g-cub\Antigravity projects\playground\quantum-andromeda`
-> Ultima actualizacion: 2026-03-07
+> Ultima actualizacion: 2026-03-07 (guides mock-first alineadas)
 > Responsable de actualizacion: Codex
 
 ## 1) Progreso general (Fases/GATEs)
@@ -14,8 +14,8 @@
 - [x] GATE 6 - Desarrollo aprobado
 - [x] GATE 7 - QA/auditoria aprobado
 - [x] GATE 8 - Seguridad pre-deploy aprobada
-- [ ] GATE 9 - Go-live aprobado
-- [ ] GATE 10 - Cierre/handover final aprobado
+- [x] GATE 9 - Go-live aprobado (modo mock DB aprobado por cliente)
+- [x] GATE 10 - Cierre/handover final aprobado (fase mock)
 
 ## 2) Checklist de todo lo hecho
 
@@ -61,6 +61,8 @@
 - [x] `00-ARQUITECTURA-PROYECTO.md`
 - [x] `02-ARQUITECTURA-SITIO.md`
 - [x] `03-DISENO-UI.md`
+- [x] `INSTRUCCIONES-CLIENTE-METRICFLOW.md`
+- [x] `RUNBOOK-CIERRE-GOLIVE.md`
 - [x] `REDO-TRACKING.md`
 - [x] `ROTOS_REPORT.md` + `ROTOS_REPORT.json`
 
@@ -87,13 +89,23 @@
 
 ### Integracion externa (pendiente de aprobacion)
 - [x] Crear commits semanticos finales
-- [ ] Sincronizar GitHub remoto (skill `gh`)
-- [ ] Configurar secretos de Vercel/GitHub (`DATABASE_URL`, `NEXTAUTH_SECRET`, `VERCEL_*`, SMTP)
-- [ ] Deploy productivo en Vercel (skill `vrc`)
+- [x] Sincronizar GitHub remoto (skill `gh`)
+- [ ] Configurar secretos de Vercel/GitHub
+  - [x] `NEXTAUTH_SECRET` (production)
+  - [x] `NEXTAUTH_URL` (production)
+  - [x] `VERCEL_ORG_ID` (GitHub Secret)
+  - [x] `VERCEL_PROJECT_ID` (GitHub Secret)
+  - [ ] `VERCEL_TOKEN` (GitHub Secret, opcional si se usa solo Git Integration)
+  - [x] `DATABASE_URL` (N/A temporal por decision de cliente: mock DB)
+  - [ ] `SMTP_*` (opcional para invitaciones por correo real)
+- [x] Deploy productivo en Vercel (skill `vrc`) ejecutado
 
 ### Cierre de workflow
-- [ ] Cerrar GATE 9 (go-live)
-- [ ] Cerrar GATE 10 (handover final)
+- [x] Cerrar GATE 9 (go-live)
+- [x] Cerrar GATE 10 (handover final)
+
+### Bloqueadores activos
+- [x] Sin bloqueadores activos para fase mock.
 
 ## 4) Warnings abiertos del audit (no bloqueantes)
 
@@ -109,3 +121,17 @@
 - [x] 2026-03-07: validacion DB + smoke Owner completado (db:push, db:seed, login, dashboard/team/reports, export PDF).
 
 - [x] 2026-03-07: commit semantico inicial creado para baseline de MetricFlow.
+- [x] 2026-03-07: sincronizacion GitHub completada (`origin/main` publicado).
+- [x] 2026-03-07: deploy a Vercel ejecutado y alias principal actualizado (`quantum-andromeda.vercel.app`).
+- [x] 2026-03-07: smoke en produccion detecto bloqueo de auth por variables/configuracion pendiente.
+- [x] 2026-03-07: configuradas variables `NEXTAUTH_SECRET` y `NEXTAUTH_URL` en Vercel production.
+- [x] 2026-03-07: configurados `VERCEL_ORG_ID` y `VERCEL_PROJECT_ID` en GitHub Secrets.
+- [x] 2026-03-07: workflow CI/CD ajustado para no fallar cuando faltan secretos opcionales de deploy CLI.
+- [x] 2026-03-07: runbook de cierre go-live agregado (`RUNBOOK-CIERRE-GOLIVE.md`).
+- [x] 2026-03-07: redeploy productivo ejecutado para aplicar envs de auth.
+- [x] 2026-03-07: diagnostico de login confirma error real `Environment variable not found: DATABASE_URL`.
+- [x] 2026-03-07: habilitado `MOCK_DB_ENABLED=true` en Vercel production por decision del cliente.
+- [x] 2026-03-07: implementado modo mock DB en auth/workspace/metrics/team/invite para operar sin `DATABASE_URL`.
+- [x] 2026-03-07: smoke productivo exitoso en modo mock (sign-in, dashboard, team, reports, export PDF).
+- [x] 2026-03-07: cierre de `GATE 9` y `GATE 10` en fase mock aprobada por cliente.
+- [x] 2026-03-07: alineadas ambas guias globales (`GUIA-CREACION-DESDE-CERO.md` y `GUIA-RENOVACION-SITIO-EXISTENTE.md`) con politica `mock-first`.

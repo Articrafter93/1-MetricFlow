@@ -6,6 +6,7 @@ import { getAuthSession } from "@/lib/auth";
 import { getWorkspaceMetrics } from "@/lib/metrics";
 import { ROLE_LABELS } from "@/lib/roles";
 import { prisma } from "@/lib/db";
+import { isMockDatabaseEnabled } from "@/lib/runtime-mode";
 import { requireWorkspaceContext } from "@/lib/workspace";
 
 async function tryAcceptInvite(
@@ -13,6 +14,10 @@ async function tryAcceptInvite(
   userId: string,
   email: string,
 ) {
+  if (isMockDatabaseEnabled()) {
+    return;
+  }
+
   if (!inviteToken || !email) {
     return;
   }
