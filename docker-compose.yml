@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: metricflow-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: metricflow
+      POSTGRES_USER: metricflow
+      POSTGRES_PASSWORD: metricflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - metricflow_db_data:/var/lib/postgresql/data
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: metricflow-web
+    depends_on:
+      - db
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    environment:
+      DATABASE_URL: postgresql://metricflow:metricflow@db:5432/metricflow?schema=public
+      NEXTAUTH_URL: http://localhost:3000
+    restart: unless-stopped
+
+volumes:
+  metricflow_db_data:

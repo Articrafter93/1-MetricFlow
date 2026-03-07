@@ -1,0 +1,15 @@
+{
+  "project": "c:\\Users\\g-cub\\.gemini\\antigravity\\playground\\quantum-andromeda",
+  "date": "2026-03-07",
+  "mode": "manual-fallback",
+  "scriptExpected": "scripts/detect-dead-ui.ps1",
+  "scriptFound": false,
+  "patterns": [
+    "href=\"#\"",
+    "href=\"\"",
+    "javascript:void(0)",
+    "onClick={() => {}}"
+  ],
+  "findings": [],
+  "status": "PASS"
+}

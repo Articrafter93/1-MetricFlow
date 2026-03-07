@@ -1,0 +1,158 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  MANAGER
+  CLIENT
+}
+
+model Workspace {
+  id              String           @id @default(cuid())
+  name            String
+  slug            String           @unique
+  logoUrl         String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  memberships     Membership[]
+  clients         ClientAccount[]
+  metrics         MetricSnapshot[]
+  invites         TeamInvite[]
+  reportTemplates ReportTemplate[]
+}
+
+model User {
+  id            String       @id @default(cuid())
+  name          String?
+  email         String?      @unique
+  emailVerified DateTime?
+  image         String?
+  passwordHash  String?
+  memberships   Membership[]
+  accounts      Account[]
+  sessions      Session[]
+  invitesSent   TeamInvite[] @relation("InviteSender")
+}
+
+model Membership {
+  id          String    @id @default(cuid())
+  role        Role      @default(CLIENT)
+  workspaceId String
+  userId      String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([userId])
+}
+
+model ClientAccount {
+  id          String           @id @default(cuid())
+  workspaceId String
+  externalId  String?
+  name        String
+  timezone    String           @default("UTC")
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  workspace   Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  metrics     MetricSnapshot[]
+
+  @@unique([workspaceId, name])
+  @@index([workspaceId])
+}
+
+model MetricSnapshot {
+  id             String        @id @default(cuid())
+  workspaceId    String
+  clientAccountId String?
+  metricDate     DateTime
+  granularity    String        @default("day")
+  funnelVisits   Int           @default(0)
+  funnelLeads    Int           @default(0)
+  funnelDeals    Int           @default(0)
+  mrr            Decimal       @db.Decimal(12, 2)
+  retentionRate  Float
+  conversionRate Float
+  churnRate      Float
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  workspace      Workspace     @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  clientAccount  ClientAccount? @relation(fields: [clientAccountId], references: [id], onDelete: SetNull)
+
+  @@unique([workspaceId, clientAccountId, metricDate, granularity])
+  @@index([workspaceId, metricDate])
+}
+
+model TeamInvite {
+  id          String    @id @default(cuid())
+  token       String    @unique
+  workspaceId String
+  email       String
+  role        Role
+  invitedById String
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  invitedBy   User      @relation("InviteSender", fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, email])
+}
+
+model ReportTemplate {
+  id             String    @id @default(cuid())
+  workspaceId    String
+  name           String
+  logoUrl        String?
+  selectedCharts Json
+  generatedById  String
+  createdAt      DateTime  @default(now())
+  workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}

@@ -1,36 +1,94 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# MetricFlow
 
-## Getting Started
+SaaS B2B multi-tenant para analítica de agencias y franquicias, construido con `Next.js + Prisma + PostgreSQL`, con dashboard dark mode, roles RBAC, invitaciones por magic link y exportación de reportes PDF white-label.
 
-First, run the development server:
+## Arquitectura resumida
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+- Frontend + Backend BFF: `Next.js App Router` + Route Handlers.
+- Auth: `NextAuth` con credenciales y sesión segura.
+- RBAC: roles `OWNER`, `MANAGER`, `CLIENT`.
+- Multi-tenancy: aislamiento estricto por `workspaceId` en modelos y consultas.
+- DB: `PostgreSQL` vía `Prisma ORM`.
+- Visualización: `Recharts`.
+- Reportería: `@react-pdf/renderer`.
+- Infra local: `Dockerfile` + `docker-compose.yml`.
+
+## Estructura
+
+- `src/app/dashboard/*` módulos de métricas, equipo y reportes.
+- `src/app/api/*` rutas backend (`metrics/live`, `team/invite`, `reports/pdf`).
+- `src/lib/*` auth, tenancy, RBAC, métricas y utilidades.
+- `prisma/schema.prisma` modelo de datos multi-tenant.
+- `prisma/seed.ts` datos demo (Owner/Manager/Client).
+- `.github/workflows/ci-cd.yml` lint + build + deploy a Vercel.
+
+## Variables de entorno
+
+Usa `.env.example` como base:
+
+```env
+DATABASE_URL="postgresql://metricflow:metricflow@localhost:5432/metricflow?schema=public"
+NEXTAUTH_SECRET="replace-with-strong-secret"
+NEXTAUTH_URL="http://localhost:3000"
+SMTP_HOST=""
+SMTP_PORT="587"
+SMTP_USER=""
+SMTP_PASS=""
+MAIL_FROM=""
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Desarrollo local (sin Docker)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+1. `npm install`
+2. Configura `.env.local`
+3. Levanta PostgreSQL (local o Docker)
+4. `npm run db:push`
+5. `npm run db:seed`
+6. `npm run dev`
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Desarrollo local (Docker Compose)
 
-## Learn More
+1. `docker compose up -d db`
+2. `npm run db:push`
+3. `npm run db:seed`
+4. `docker compose up --build web`
 
-To learn more about Next.js, take a look at the following resources:
+## Usuarios demo
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- `owner@metricflow.dev` / `Demo12345!`
+- `manager@metricflow.dev` / `Demo12345!`
+- `client@metricflow.dev` / `Demo12345!`
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Flujos funcionales implementados
 
-## Deploy on Vercel
+- Dashboard de métricas con filtros instantáneos `7d/30d/90d`.
+- Tarjetas con expansión animada para detalle de gráficos.
+- Team settings con invitación por magic link y envío SMTP opcional.
+- Exportación de PDF white-label para Owner/Manager.
+- Restricción de permisos por rol.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## CI/CD
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Workflow en `.github/workflows/ci-cd.yml`:
+
+1. Ejecuta `npm ci`, `npm run lint`, `npm run build`.
+2. En `main`, despliega a Vercel usando secretos:
+   - `VERCEL_TOKEN`
+   - `VERCEL_ORG_ID`
+   - `VERCEL_PROJECT_ID`
+
+## Entregables del protocolo init
+
+- `01-BRIEFING.md`
+- `MATRIZ-BACKEND.md`
+- `00-ARQUITECTURA-PROYECTO.md`
+- `02-ALCANCE-Y-EXITO.md`
+- `02-ARQUITECTURA-SITIO.md`
+- `03-DISENO-UI.md`
+
+## Validación
+
+Comandos de cierre:
+
+- `npm run lint`
+- `npm run build`

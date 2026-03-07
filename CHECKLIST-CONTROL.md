@@ -1,0 +1,111 @@
+# CHECKLIST DE CONTROL - METRICFLOW
+
+> Ruta del proyecto: `C:\Users\g-cub\Antigravity projects\playground\quantum-andromeda`
+> Ultima actualizacion: 2026-03-07
+> Responsable de actualizacion: Codex
+
+## 1) Progreso general (Fases/GATEs)
+
+- [x] GATE 1 - Briefing aprobado
+- [x] GATE 2 - Alcance aprobado
+- [x] GATE 3 - Arquitectura/stack aprobado
+- [x] GATE 4 - Direccion visual aprobada (ruta B: diseno final aprobado por cliente en sesion)
+- [x] GATE 5 - Scaffold aprobado
+- [x] GATE 6 - Desarrollo aprobado
+- [x] GATE 7 - QA/auditoria aprobado
+- [x] GATE 8 - Seguridad pre-deploy aprobada
+- [ ] GATE 9 - Go-live aprobado
+- [ ] GATE 10 - Cierre/handover final aprobado
+
+## 2) Checklist de todo lo hecho
+
+### Setup y arquitectura
+- [x] Activacion de skill `init` + preflight completo (GEMINI/INDEX/WORKFLOW/GUIA)
+- [x] Scaffold de proyecto Next.js + TypeScript + Tailwind + ESLint
+- [x] Configuracion de scripts de build/lint/db
+- [x] Definicion de arquitectura multi-tenant + RBAC
+- [x] Modelo Prisma implementado con `workspaceId` como base de aislamiento
+- [x] Seed de datos demo con usuarios Owner/Manager/Client
+
+### Backend, auth y seguridad
+- [x] NextAuth con credenciales y sesion enriquecida por rol/workspace
+- [x] Helpers de contexto de workspace y validacion de rol
+- [x] APIs creadas: auth, metrics live, team invite, reports pdf
+- [x] Validacion Zod en rutas API criticas
+- [x] Hardening de headers en `next.config.ts`
+- [x] Proxy de proteccion para `/dashboard` y APIs privadas
+
+### Frontend y UX
+- [x] Landing inicial de producto
+- [x] Pantalla de login funcional
+- [x] Dashboard de metricas (MRR/funnel/retencion/conversion/churn)
+- [x] Filtro por rango de fechas (7/30/90)
+- [x] Micro-interaccion de panel expandible para detalle de metricas
+- [x] Team Settings con invitacion por magic link (Owner)
+- [x] Reportes PDF white-label para Owner/Manager
+- [x] Pagina de privacidad publicada (`/privacidad`)
+- [x] Link a privacidad en formularios con PII
+
+### DevOps y entorno
+- [x] Dockerfile multi-stage
+- [x] `docker-compose.yml` (web + postgres)
+- [x] `.env.example` + `.env.local` base
+- [x] `.gitignore` ajustado para `.env*` y `!.env.example`
+- [x] Workflow CI/CD en `.github/workflows/ci-cd.yml`
+- [x] `README.md` pulido con arquitectura y pasos de ejecucion
+
+### Documentacion de protocolo
+- [x] `01-BRIEFING.md`
+- [x] `MATRIZ-BACKEND.md`
+- [x] `02-ALCANCE-Y-EXITO.md`
+- [x] `00-ARQUITECTURA-PROYECTO.md`
+- [x] `02-ARQUITECTURA-SITIO.md`
+- [x] `03-DISENO-UI.md`
+- [x] `REDO-TRACKING.md`
+- [x] `ROTOS_REPORT.md` + `ROTOS_REPORT.json`
+
+### Calidad y cumplimiento
+- [x] `npm run lint` en verde
+- [x] `npm run build` en verde
+- [x] Audit global: `PASS_WITH_WARNINGS` (sin FAIL)
+
+## 3) Checklist de lo que falta
+
+### Regularizacion metodologica obligatoria (GATE 4)
+- [x] Ejecutar flujo visual y cerrar evidencia de direccion UX/UI
+  - [x] Opcion A: N/A en este cierre (no se uso Stitch)
+  - [x] Opcion B: Registrar y aprobar diseno visual final entregado/aprobado por cliente en sesion
+  - [x] En ambos casos: expandir UX/UI del resto de paginas con base en el diseno elegido
+  - [x] Actualizar `03-DISENO-UI.md` con evidencia y decision final
+  - [x] Marcar `GATE 4` como aprobado solo despues de la evidencia
+
+### Cierre tecnico-operativo
+- [x] Ejecutar DB real en el nuevo path y validar flujo end-to-end:
+  - [x] `npm run db:push`
+  - [x] `npm run db:seed`
+  - [x] Login con usuarios demo y recorrido completo por dashboard/team/reports
+
+### Integracion externa (pendiente de aprobacion)
+- [x] Crear commits semanticos finales
+- [ ] Sincronizar GitHub remoto (skill `gh`)
+- [ ] Configurar secretos de Vercel/GitHub (`DATABASE_URL`, `NEXTAUTH_SECRET`, `VERCEL_*`, SMTP)
+- [ ] Deploy productivo en Vercel (skill `vrc`)
+
+### Cierre de workflow
+- [ ] Cerrar GATE 9 (go-live)
+- [ ] Cerrar GATE 10 (handover final)
+
+## 4) Warnings abiertos del audit (no bloqueantes)
+
+- [ ] Registrar trazabilidad adicional de ejecucion/GATEs para reducir warning `WF-005`.
+
+## 5) Bitacora de actualizaciones
+
+- [x] 2026-03-07: Checklist creada en ruta nueva tras mover el proyecto.
+- [x] 2026-03-07: GATE 4 cambiado a pendiente por incumplimiento del flujo visual obligatorio.
+- [x] 2026-03-07: Se agrego bloque de regularizacion metodologica para cerrar GATE 4 correctamente.
+- [x] 2026-03-07: GATE 4 cerrado por ruta B (diseno final aprobado por cliente en sesion) y checklist regularizada.
+
+- [x] 2026-03-07: validacion DB + smoke Owner completado (db:push, db:seed, login, dashboard/team/reports, export PDF).
+
+- [x] 2026-03-07: commit semantico inicial creado para baseline de MetricFlow.
