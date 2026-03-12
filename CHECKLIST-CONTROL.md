@@ -90,6 +90,7 @@
 ### Integracion externa (pendiente de aprobacion)
 - [x] Crear commits semanticos finales
 - [x] Sincronizar GitHub remoto (skill `gh`)
+- [ ] Configurar secretos de Vercel/GitHub (`DATABASE_URL`, `NEXTAUTH_SECRET`, `VERCEL_*`, SMTP)
 - [ ] Configurar secretos de Vercel/GitHub
   - [x] `NEXTAUTH_SECRET` (production)
   - [x] `NEXTAUTH_URL` (production)
@@ -106,6 +107,9 @@
 
 ### Bloqueadores activos
 - [x] Sin bloqueadores activos para fase mock.
+
+### Bloqueadores activos
+- [ ] Produccion bloqueada en auth (`/api/auth/error`) por configuracion incompleta de entorno en Vercel.
 
 ## 4) Warnings abiertos del audit (no bloqueantes)
 

@@ -1,0 +1,85 @@
+name: quality-gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check (progressive)
+        run: |
+          if node -e "const s=require('./package.json').scripts||{}; process.exit(s.check?0:1)"; then
+            npm run check
+          elif node -e "const s=require('./package.json').scripts||{}; process.exit(s.lint?0:1)"; then
+            echo "::warning::Missing npm script 'check'. Running 'npm run lint' as progressive fallback."
+            npm run lint
+          else
+            echo "::warning::Missing both 'check' and 'lint'. Skipping check step."
+          fi
+
+      - name: Test (progressive)
+        run: |
+          if node -e "const s=require('./package.json').scripts||{}; process.exit(s.test?0:1)"; then
+            npm run test
+          else
+            echo "::warning::Missing npm script 'test'. Skipping test step."
+          fi
+
+      - name: Build
+        run: npm run build
+
+      - name: Smoke (progressive)
+        run: |
+          if node -e "const s=require('./package.json').scripts||{}; process.exit(s['test:smoke']?0:1)"; then
+            npm run test:smoke
+          else
+            echo "::warning::Missing npm script 'test:smoke'. Skipping smoke step."
+          fi
+
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    needs: quality
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Vercel pull
+        run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Vercel build
+        run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+      - name: Vercel deploy
+        run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
+        env:
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
