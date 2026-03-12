@@ -1,0 +1,3 @@
+{
+  "ignoreCommand": "if [ \"${VERCEL_ENV}\" != \"preview\" ]; then exit 1; fi; ref=\"${VERCEL_GIT_COMMIT_REF:-}\"; case \"$ref\" in dependabot/*|chore/*|docs/*|ci/*|test/*|experiments/*) echo \"Skipping low-priority preview branch: $ref\"; exit 0 ;; esac; exit 1"
+}
