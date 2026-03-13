@@ -44,35 +44,17 @@ jobs:
             --exclude dist \
             --exclude build \
             --error
-      - name: Check (progressive)
-        run: |
-          if node -e "const s=require('./package.json').scripts||{}; process.exit(s.check?0:1)"; then
-            npm run check
-          elif node -e "const s=require('./package.json').scripts||{}; process.exit(s.lint?0:1)"; then
-            echo "::warning::Missing npm script 'check'. Running 'npm run lint' as progressive fallback."
-            npm run lint
-          else
-            echo "::warning::Missing both 'check' and 'lint'. Skipping check step."
-          fi
+      - name: Check
+        run: npm run check
 
-      - name: Test (progressive)
-        run: |
-          if node -e "const s=require('./package.json').scripts||{}; process.exit(s.test?0:1)"; then
-            npm run test
-          else
-            echo "::warning::Missing npm script 'test'. Skipping test step."
-          fi
+      - name: Test
+        run: npm run test
 
       - name: Build
         run: npm run build
 
-      - name: Smoke (progressive)
-        run: |
-          if node -e "const s=require('./package.json').scripts||{}; process.exit(s['test:smoke']?0:1)"; then
-            npm run test:smoke
-          else
-            echo "::warning::Missing npm script 'test:smoke'. Skipping smoke step."
-          fi
+      - name: Smoke
+        run: npm run test:smoke
 
   deploy:
     if: github.ref == 'refs/heads/main' && secrets.VERCEL_TOKEN != '' && secrets.VERCEL_ORG_ID != '' && secrets.VERCEL_PROJECT_ID != ''

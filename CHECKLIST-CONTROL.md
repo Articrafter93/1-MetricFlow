@@ -1,6 +1,6 @@
 # CHECKLIST DE CONTROL - METRICFLOW
 
-> Ruta del proyecto: `C:\Users\g-cub\Antigravity projects\playground\quantum-andromeda`
+> Ruta del proyecto: `C:\Users\g-cub\Antigravity projects\playground\1- MetricFlow`
 > Ultima actualizacion: 2026-03-07 (guides mock-first alineadas)
 > Responsable de actualizacion: Codex
 
@@ -126,7 +126,7 @@
 
 - [x] 2026-03-07: commit semantico inicial creado para baseline de MetricFlow.
 - [x] 2026-03-07: sincronizacion GitHub completada (`origin/main` publicado).
-- [x] 2026-03-07: deploy a Vercel ejecutado y alias principal actualizado (`quantum-andromeda.vercel.app`).
+- [x] 2026-03-07: deploy a Vercel ejecutado y alias principal actualizado (`1-metricflow.vercel.app`).
 - [x] 2026-03-07: smoke en produccion detecto bloqueo de auth por variables/configuracion pendiente.
 - [x] 2026-03-07: configuradas variables `NEXTAUTH_SECRET` y `NEXTAUTH_URL` en Vercel production.
 - [x] 2026-03-07: configurados `VERCEL_ORG_ID` y `VERCEL_PROJECT_ID` en GitHub Secrets.
@@ -139,3 +139,31 @@
 - [x] 2026-03-07: smoke productivo exitoso en modo mock (sign-in, dashboard, team, reports, export PDF).
 - [x] 2026-03-07: cierre de `GATE 9` y `GATE 10` en fase mock aprobada por cliente.
 - [x] 2026-03-07: alineadas ambas guias globales (`GUIA-CREACION-DESDE-CERO.md` y `GUIA-RENOVACION-SITIO-EXISTENTE.md`) con politica `mock-first`.
+
+## 6) Regularizacion SaaS v2 (2026-03-13)
+
+### Implementado en este ciclo
+- [x] Eliminado modo mock y credenciales hardcodeadas en runtime de app.
+- [x] Aislamiento tenant reforzado con rutas `/(app)/[tenantSlug]/*`.
+- [x] Middleware/proxy inyecta `x-tenant-slug` en rutas privadas.
+- [x] Nuevo contexto `TenantRequestContext` + validacion de membresia por tenant en APIs privadas.
+- [x] RBAC declarativo centralizado (`src/lib/rbac.ts`) aplicado a UI y APIs.
+- [x] Nuevas rutas core: `dashboard`, `analytics`, `clients`, `reports`, `settings/team`, `settings/workspace`.
+- [x] Contrato de métricas actualizado: `range=7d|30d|90d|custom`, `from/to`, `clientId`.
+- [x] Dashboard renovado con 4 KPI cards, funnel, revenue line, cohort heatmap y recent activity.
+- [x] PDF white-label endurecido (sin branding "MetricFlow" dentro del documento).
+- [x] Validacion Zod en APIs privadas y legacy deprecadas.
+- [x] Indices Prisma compuestos `workspaceId + createdAt` agregados en tablas frecuentes.
+- [x] Scripts de calidad agregados: `check`, `test`, `test:smoke`.
+- [x] CI `quality-gate` endurecido sin fallback progresivo.
+- [x] Unit tests agregados para RBAC y calculo de métricas.
+- [x] Audit global actualizado: `PASS`.
+
+### Pendiente por bloqueo de entorno
+- [ ] `npm run build` local bloqueado por falta de acceso de red para descargar Google Fonts (`Inter`, `JetBrains Mono`) en `next/font/google`.
+- [ ] Migracion de dependencias no instalada por bloqueo a `registry.npmjs.org` en esta sesion:
+  - [ ] NextAuth/Auth.js v5
+  - [ ] Tremor
+  - [ ] Framer Motion
+  - [ ] Pino (logger)
+  - [ ] Jest + Testing Library

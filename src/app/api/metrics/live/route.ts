@@ -1,53 +1,28 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { z } from "zod";
-import { getAuthSession } from "@/lib/auth";
-import { prisma } from "@/lib/db";
-import { getWorkspaceMetrics } from "@/lib/metrics";
-import { getMockMembershipByUserId } from "@/lib/mock-data";
-import { isMockDatabaseEnabled } from "@/lib/runtime-mode";
 
 const querySchema = z.object({
-  days: z.coerce.number().int().min(7).max(365).default(30),
+  range: z.enum(["7d", "30d", "90d", "custom"]).optional(),
 });
 
-export async function GET(request: NextRequest) {
-  const session = await getAuthSession();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
+export async function GET(request: Request) {
+  const url = new URL(request.url);
   const parsed = querySchema.safeParse({
-    days: request.nextUrl.searchParams.get("days") ?? 30,
+    range: url.searchParams.get("range") ?? undefined,
   });
 
   if (!parsed.success) {
     return NextResponse.json(
-      { error: "Invalid query params", details: parsed.error.flatten() },
+      { error: "Invalid query", details: parsed.error.flatten() },
       { status: 400 },
     );
   }
 
-  const days = parsed.data.days;
-  let workspaceId: string | undefined;
-
-  if (isMockDatabaseEnabled()) {
-    workspaceId =
-      session.user.workspaceId ??
-      getMockMembershipByUserId(session.user.id)?.workspaceId;
-  } else {
-    const membership = await prisma.membership.findFirst({
-      where: { userId: session.user.id },
-      select: { workspaceId: true },
-    });
-
-    workspaceId = membership?.workspaceId;
-  }
-
-  if (!workspaceId) {
-    return NextResponse.json({ error: "Workspace not found" }, { status: 404 });
-  }
-
-  const metrics = await getWorkspaceMetrics(workspaceId, days);
-
-  return NextResponse.json(metrics);
+  return NextResponse.json(
+    {
+      error:
+        "Deprecated endpoint. Use /api/tenants/{tenantSlug}/metrics/live.",
+    },
+    { status: 410 },
+  );
 }

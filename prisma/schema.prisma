@@ -52,6 +52,7 @@ model Membership {
 
   @@unique([workspaceId, userId])
   @@index([userId])
+  @@index([workspaceId, createdAt])
 }
 
 model ClientAccount {
@@ -67,6 +68,7 @@ model ClientAccount {
 
   @@unique([workspaceId, name])
   @@index([workspaceId])
+  @@index([workspaceId, createdAt])
 }
 
 model MetricSnapshot {
@@ -89,6 +91,7 @@ model MetricSnapshot {
 
   @@unique([workspaceId, clientAccountId, metricDate, granularity])
   @@index([workspaceId, metricDate])
+  @@index([workspaceId, createdAt])
 }
 
 model TeamInvite {
@@ -105,6 +108,7 @@ model TeamInvite {
   invitedBy   User      @relation("InviteSender", fields: [invitedById], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, email])
+  @@index([workspaceId, createdAt])
 }
 
 model ReportTemplate {
@@ -118,6 +122,7 @@ model ReportTemplate {
   workspace      Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId])
+  @@index([workspaceId, createdAt])
 }
 
 model Account {

@@ -1,7 +1,7 @@
 # ROTOS REPORT
 
 Fecha: 2026-03-07  
-Proyecto: `c:\Users\g-cub\.gemini\antigravity\playground\quantum-andromeda`
+Proyecto: `c:\Users\g-cub\Antigravity projects\playground\1- MetricFlow`
 
 ## Modo de ejecución
 - Script esperado por skill: `scripts/detect-dead-ui.ps1`

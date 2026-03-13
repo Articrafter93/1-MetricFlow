@@ -7,19 +7,20 @@ import { useState } from "react";
 
 export function SignInForm() {
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState("owner@metricflow.dev");
-  const [password, setPassword] = useState("Demo12345!");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [magicState, setMagicState] = useState<string | null>(null);
 
   const invite = searchParams.get("invite");
+  const callbackUrl = invite ? `/invite/${invite}?accept=1` : "/app-redirect";
 
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setLoading(true);
     setError(null);
 
-    const callbackUrl = invite ? `/dashboard?invite=${invite}` : "/dashboard";
     const result = await signIn("credentials", {
       email,
       password,
@@ -37,60 +38,86 @@ export function SignInForm() {
     window.location.href = result.url ?? callbackUrl;
   }
 
+  async function requestMagicLink() {
+    if (!email) {
+      setMagicState("Escribe primero tu email para recibir el acceso.");
+      return;
+    }
+
+    setMagicState("Enviando magic link...");
+    const result = await signIn("email", {
+      email,
+      callbackUrl,
+      redirect: false,
+    });
+
+    if (!result || result.error) {
+      setMagicState("No fue posible enviar el magic link. Verifica SMTP.");
+      return;
+    }
+
+    setMagicState("Magic link enviado. Revisa tu bandeja de entrada.");
+  }
+
   return (
     <div className="glass-panel mx-auto w-full max-w-md p-6">
       <h1 className="text-2xl font-semibold tracking-tight">MetricFlow</h1>
-      <p className="mt-2 text-sm text-slate-400">
+      <p className="mt-2 text-sm text-text-secondary">
         Accede a tu workspace multi-tenant con aislamiento de datos por agencia.
       </p>
 
       {invite ? (
-        <p className="mt-4 rounded-lg border border-cyan-400/40 bg-cyan-500/10 p-3 text-sm text-cyan-200">
+        <p className="mt-4 rounded-lg border border-accent/50 bg-accent/10 p-3 text-sm text-text-primary">
           Invitacion detectada. Al entrar, se intentara vincular este usuario al workspace.
         </p>
       ) : null}
 
       <form className="mt-5 space-y-4" onSubmit={onSubmit}>
-        <label className="block text-sm text-slate-300">
+        <label className="block text-sm text-text-primary">
           Email
           <input
             type="email"
             required
             value={email}
             onChange={(event) => setEmail(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 outline-none transition focus:border-cyan-400/70"
+            className="mt-1 w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 outline-none transition focus:border-accent"
           />
         </label>
-        <label className="block text-sm text-slate-300">
+        <label className="block text-sm text-text-primary">
           Password
           <input
             type="password"
             required
             value={password}
             onChange={(event) => setPassword(event.target.value)}
-            className="mt-1 w-full rounded-lg border border-slate-700 bg-slate-950/70 px-3 py-2 outline-none transition focus:border-cyan-400/70"
+            className="mt-1 w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 outline-none transition focus:border-accent"
           />
         </label>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full rounded-lg border border-cyan-400/60 bg-cyan-500/20 px-3 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-500/30 disabled:cursor-not-allowed disabled:border-slate-700 disabled:bg-slate-900 disabled:text-slate-500"
+          className="w-full rounded-lg border border-accent bg-accent/15 px-3 py-2 text-sm font-semibold text-text-primary transition hover:bg-accent/25 disabled:cursor-not-allowed disabled:border-border disabled:bg-bg-elevated disabled:text-text-secondary"
         >
           {loading ? "Ingresando..." : "Ingresar"}
         </button>
       </form>
 
-      {error ? <p className="mt-3 text-sm text-rose-300">{error}</p> : null}
+      <button
+        type="button"
+        onClick={requestMagicLink}
+        className="mt-3 w-full rounded-lg border border-border bg-bg-surface px-3 py-2 text-sm text-text-primary transition hover:border-accent"
+      >
+        Enviar magic link
+      </button>
 
-      <div className="mt-6 rounded-lg border border-slate-800 bg-slate-950/60 p-3 text-xs text-slate-400">
-        <p>Demo users:</p>
-        <p>`owner@metricflow.dev` / `Demo12345!`</p>
-        <p>`manager@metricflow.dev` / `Demo12345!`</p>
-        <p>`client@metricflow.dev` / `Demo12345!`</p>
-        <p className="mt-2">
+      {error ? <p className="mt-3 text-sm text-danger">{error}</p> : null}
+      {magicState ? <p className="mt-2 text-sm text-text-secondary">{magicState}</p> : null}
+
+      <div className="mt-6 rounded-lg border border-border bg-bg-elevated p-3 text-xs text-text-secondary">
+        <p>
           Al continuar aceptas nuestra{" "}
-          <Link href="/privacidad" className="text-cyan-300 underline underline-offset-2">
+          <Link href="/privacidad" className="text-accent underline underline-offset-2">
             politica de privacidad
           </Link>
           .

@@ -28,7 +28,7 @@ export async function sendInviteEmail(payload: InviteEmailPayload) {
   await transporter.sendMail({
     from,
     to: payload.to,
-    subject: `Invitacion a ${payload.workspaceName} en MetricFlow`,
+    subject: `Invitacion a ${payload.workspaceName}`,
     html: `
       <p>Recibiste una invitacion para unirte a <b>${payload.workspaceName}</b> como <b>${payload.role}</b>.</p>
       <p><a href="${payload.inviteUrl}">Aceptar invitacion</a></p>

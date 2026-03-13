@@ -7,9 +7,9 @@
 - [ ] No unsafe command changes to CI/deploy without human review.
 
 ## Quality Gate
-- [ ] `npm run check` passed (or progressive fallback warning reviewed).
-- [ ] `npm run test` passed (or warning reviewed).
-- [ ] `npm run test:smoke` passed (or warning reviewed).
+- [ ] `npm run check` passed.
+- [ ] `npm run test` passed.
+- [ ] `npm run test:smoke` passed.
 - [ ] `npm run build` passed (required).
 
 ## Governance

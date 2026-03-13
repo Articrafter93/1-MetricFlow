@@ -17,26 +17,26 @@ export default function Home() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-[radial-gradient(circle_at_top,_#1d2f49,_#070b14_45%)] px-4">
+    <div className="auth-bg flex min-h-screen items-center justify-center px-4">
       <main className="glass-panel w-full max-w-4xl p-8 md:p-12">
-        <p className="text-xs uppercase tracking-[0.18em] text-slate-400">MetricFlow SaaS</p>
+        <p className="text-xs uppercase tracking-[0.18em] text-text-secondary">MetricFlow SaaS</p>
         <h1 className="mt-4 max-w-2xl text-4xl font-semibold tracking-tight md:text-5xl">
           Analitica multi-tenant para agencias y franquicias.
         </h1>
-        <p className="mt-4 max-w-2xl text-sm text-slate-300 md:text-base">
+        <p className="mt-4 max-w-2xl text-sm text-text-secondary md:text-base">
           Dashboard B2B en tiempo real con aislamiento por workspace, roles Owner/Manager/Client,
           reportes PDF white-label y backend listo para Docker + PostgreSQL.
         </p>
         <div className="mt-8 flex flex-wrap gap-3">
           <Link
-            href="/sign-in"
-            className="rounded-lg border border-cyan-400/60 bg-cyan-500/20 px-4 py-2 text-sm font-semibold text-cyan-100 transition hover:bg-cyan-500/30"
+            href="/login"
+            className="rounded-lg border border-accent bg-accent/20 px-4 py-2 text-sm font-semibold text-text-primary transition hover:bg-accent/30"
           >
             Iniciar sesion
           </Link>
           <Link
-            href="/dashboard"
-            className="rounded-lg border border-slate-700 bg-slate-950/70 px-4 py-2 text-sm font-semibold text-slate-200 transition hover:border-slate-500"
+            href="/app-redirect"
+            className="rounded-lg border border-border bg-bg-elevated px-4 py-2 text-sm font-semibold text-text-primary transition hover:border-accent"
           >
             Ver dashboard
           </Link>

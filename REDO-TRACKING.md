@@ -26,7 +26,7 @@ GATE_10_STATUS: APROBADO (handover de fase mock completado)
 - 2026-03-07 Paso 6: Desarrollo iterativo frontend/backend completado.
 - 2026-03-07 Paso 7: QA (lint/build + rotos fallback + audit) ejecutado.
 - 2026-03-07 Paso 8: Hardening base aplicado (headers, auth, env, privacy).
-- 2026-03-07 Paso 9: GitHub sincronizado (`origin/main`) y deploy Vercel ejecutado (`quantum-andromeda.vercel.app`).
+- 2026-03-07 Paso 9: GitHub sincronizado (`origin/main`) y deploy Vercel ejecutado (`1-metricflow.vercel.app`).
 - 2026-03-07 Paso 9: Configuradas variables de auth en Vercel (`NEXTAUTH_SECRET`, `NEXTAUTH_URL`) y redeploy ejecutado.
 - 2026-03-07 Paso 9: Configurados `VERCEL_ORG_ID` y `VERCEL_PROJECT_ID` en GitHub Secrets; faltante `VERCEL_TOKEN` no bloquea CD por Git Integration.
 - 2026-03-07 Paso 9: Workflow CI/CD ajustado para ejecutar deploy CLI solo si secretos estan presentes.

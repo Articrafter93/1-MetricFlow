@@ -17,6 +17,7 @@ export type ReportDocumentProps = {
   workspaceName: string;
   logoUrl?: string | null;
   dateRangeLabel: string;
+  clientName: string;
   metrics: ReportMetric[];
 };
 
@@ -84,6 +85,7 @@ export function createReportDocument({
   workspaceName,
   logoUrl,
   dateRangeLabel,
+  clientName,
   metrics,
 }: ReportDocumentProps) {
   return (
@@ -93,6 +95,7 @@ export function createReportDocument({
           <View style={styles.titleBlock}>
             <Text style={styles.title}>Reporte automatizado</Text>
             <Text style={styles.subtitle}>{workspaceName}</Text>
+            <Text style={styles.subtitle}>Cliente: {clientName}</Text>
             <Text style={styles.subtitle}>Periodo: {dateRangeLabel}</Text>
           </View>
           {logoUrl ? <Image src={logoUrl} style={styles.logo} /> : null}
@@ -107,9 +110,7 @@ export function createReportDocument({
           ))}
         </View>
 
-        <Text style={styles.footer}>
-          Documento generado por MetricFlow. White-label habilitado por workspace.
-        </Text>
+        <Text style={styles.footer}>Documento analitico de uso interno.</Text>
       </Page>
     </Document>
   );
