@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { appLogger } from "@/lib/logger";
 import { createReportDocument } from "@/lib/report-document";
-import { getWorkspaceMetrics } from "@/lib/metrics";
+import { MetricsAccessError, getWorkspaceMetrics } from "@/lib/metrics";
 import {
   TenantContextError,
   requireTenantApiContext,
@@ -35,6 +35,11 @@ function toPercent(value: number) {
   return `${(value * 100).toFixed(1)}%`;
 }
 
+function toSignedPercent(value: number) {
+  const sign = value > 0 ? "+" : "";
+  return `${sign}${(value * 100).toFixed(1)}%`;
+}
+
 type RouteContext = {
   params: Promise<{ tenantSlug: string }>;
 };
@@ -64,22 +69,33 @@ export async function POST(request: NextRequest, context: RouteContext) {
     });
 
     const chartToMetric = {
-      mrr: { label: "MRR", value: `$${Math.round(metrics.summary.mrr).toLocaleString()}` },
+      mrr: {
+        label: "MRR",
+        value: `$${Math.round(metrics.summary.mrr).toLocaleString()}`,
+        delta: `Variacion: ${toSignedPercent(metrics.summary.mrrDelta)}`,
+      },
       funnel: {
         label: "Embudo (visitas/leads/deals)",
         value: `${metrics.funnel.visits}/${metrics.funnel.leads}/${metrics.funnel.deals}`,
+        delta: `V->L ${toPercent(metrics.funnel.visitToLeadPct)} | L->C ${toPercent(metrics.funnel.leadToDealPct)}`,
       },
       retention: {
         label: "Retencion promedio",
         value: toPercent(metrics.summary.retentionRate),
+        delta: `Variacion: ${toSignedPercent(metrics.summary.retentionDelta)}`,
       },
       churn: {
         label: "Churn promedio",
         value: toPercent(metrics.summary.churnRate),
+        delta: `Variacion: ${toSignedPercent(metrics.summary.churnDelta)}`,
       },
     } as const;
 
-    const selectedMetrics = parsed.data.charts.map((chart) => chartToMetric[chart]);
+    const selectedKpis = parsed.data.charts.map((chart) => chartToMetric[chart]);
+    const revenuePoints = metrics.points.slice(-8).map((point) => ({
+      date: point.date,
+      mrr: `$${Math.round(point.mrr).toLocaleString()}`,
+    }));
 
     const buffer = await renderToBuffer(
       createReportDocument({
@@ -87,7 +103,15 @@ export async function POST(request: NextRequest, context: RouteContext) {
         logoUrl: parsed.data.logoUrl ?? tenantContext.workspaceLogoUrl,
         dateRangeLabel: metrics.rangeLabel,
         clientName: parsed.data.clientName,
-        metrics: selectedMetrics,
+        kpis: selectedKpis,
+        funnel: {
+          visits: metrics.funnel.visits.toLocaleString(),
+          leads: metrics.funnel.leads.toLocaleString(),
+          deals: metrics.funnel.deals.toLocaleString(),
+          visitToLeadPct: toPercent(metrics.funnel.visitToLeadPct),
+          leadToDealPct: toPercent(metrics.funnel.leadToDealPct),
+        },
+        revenuePoints,
       }),
     );
 
@@ -100,6 +124,9 @@ export async function POST(request: NextRequest, context: RouteContext) {
     });
   } catch (error) {
     if (error instanceof TenantContextError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    if (error instanceof MetricsAccessError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
     }
     appLogger.error("reports-pdf-failed", { tenantSlug });

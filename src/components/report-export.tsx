@@ -20,6 +20,7 @@ export function ReportExport({ tenantSlug }: ReportExportProps) {
   const [from, setFrom] = useState("");
   const [to, setTo] = useState("");
   const [clientName, setClientName] = useState("");
+  const [clientId, setClientId] = useState("");
   const [logoUrl, setLogoUrl] = useState("");
   const [selected, setSelected] = useState<ChartOption[]>([
     "mrr",
@@ -38,13 +39,14 @@ export function ReportExport({ tenantSlug }: ReportExportProps) {
     event.preventDefault();
     setStatus("Generando PDF...");
 
-    const response = await fetch(`/api/tenants/${tenantSlug}/reports/pdf`, {
+    const response = await fetch(`/api/tenants/${tenantSlug}/reports`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         range,
         from: range === "custom" ? from : undefined,
         to: range === "custom" ? to : undefined,
+        clientId: clientId.trim() || undefined,
         clientName,
         charts: selected,
         logoUrl: logoUrl || undefined,
@@ -126,6 +128,16 @@ export function ReportExport({ tenantSlug }: ReportExportProps) {
             placeholder="Cliente principal"
             value={clientName}
             onChange={(event) => setClientName(event.target.value)}
+            className="mt-1 w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 outline-none transition focus:border-accent"
+          />
+        </label>
+        <label className="block text-sm text-text-primary">
+          Client ID (opcional)
+          <input
+            type="text"
+            placeholder="clt_123"
+            value={clientId}
+            onChange={(event) => setClientId(event.target.value)}
             className="mt-1 w-full rounded-lg border border-border bg-bg-elevated px-3 py-2 outline-none transition focus:border-accent"
           />
         </label>
