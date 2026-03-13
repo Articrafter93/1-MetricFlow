@@ -1,7 +1,8 @@
 "use client";
 
-import { Role } from "@prisma/client";
+import type { Role } from "@prisma/client";
 import { useState } from "react";
+import { hasPermission } from "@/lib/rbac";
 
 type ClientRecord = {
   id: string;
@@ -22,7 +23,7 @@ export function ClientsPanel({ tenantSlug, role, initialClients }: ClientsPanelP
   const [timezone, setTimezone] = useState("UTC");
   const [status, setStatus] = useState<string | null>(null);
 
-  const canManage = role === "OWNER" || role === "MANAGER";
+  const canManage = hasPermission(role, "clients", "manage");
 
   async function addClient(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -115,4 +116,3 @@ export function ClientsPanel({ tenantSlug, role, initialClients }: ClientsPanelP
     </section>
   );
 }
-

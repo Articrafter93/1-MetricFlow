@@ -6,11 +6,17 @@ export type RbacResource =
   | "clients"
   | "reports"
   | "team"
-  | "workspaceSettings";
+  | "workspaceSettings"
+  | "billingInternal";
 
 export type RbacAction = "view" | "manage" | "invite" | "export";
 
-const RBAC_POLICY: Record<RbacResource, Partial<Record<RbacAction, Role[]>>> = {
+export type Permission = {
+  resource: RbacResource;
+  action: RbacAction;
+};
+
+export const RBAC_POLICY: Record<RbacResource, Partial<Record<RbacAction, Role[]>>> = {
   dashboard: {
     view: [Role.OWNER, Role.MANAGER, Role.CLIENT],
   },
@@ -34,6 +40,10 @@ const RBAC_POLICY: Record<RbacResource, Partial<Record<RbacAction, Role[]>>> = {
     view: [Role.OWNER],
     manage: [Role.OWNER],
   },
+  billingInternal: {
+    view: [Role.OWNER],
+    manage: [Role.OWNER],
+  },
 };
 
 export function hasPermission(
@@ -49,3 +59,6 @@ export function hasPermission(
   return !!allowedRoles?.includes(role);
 }
 
+export function hasRequiredPermission(role: Role | undefined, permission: Permission) {
+  return hasPermission(role, permission.resource, permission.action);
+}

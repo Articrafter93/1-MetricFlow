@@ -1,9 +1,11 @@
 "use client";
 
+import type { Role } from "@prisma/client";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   BarChart3,
+  CreditCard,
   ChevronsLeftRightEllipsis,
   FileBarChart2,
   LogOut,
@@ -12,7 +14,8 @@ import {
   Users,
 } from "lucide-react";
 import { signOut } from "next-auth/react";
-import { useState } from "react";
+import { type ComponentType, useState } from "react";
+import { type Permission, hasRequiredPermission } from "@/lib/rbac";
 import { cn } from "@/lib/utils";
 
 type DashboardShellProps = {
@@ -20,19 +23,66 @@ type DashboardShellProps = {
   tenantSlug: string;
   workspaceName: string;
   roleLabel: string;
+  role: Role;
 };
 
-const navItems = [
-  { key: "dashboard", href: "dashboard", label: "Dashboard", icon: BarChart3 },
-  { key: "analytics", href: "analytics", label: "Analytics", icon: FileBarChart2 },
-  { key: "clients", href: "clients", label: "Clients", icon: Users },
-  { key: "reports", href: "reports", label: "Reports", icon: Settings2 },
-  { key: "settings-team", href: "settings/team", label: "Team", icon: UserCog },
+type NavItem = {
+  key: string;
+  href: string;
+  label: string;
+  icon: ComponentType<{ className?: string }>;
+  permission?: Permission;
+};
+
+const navItems: NavItem[] = [
+  {
+    key: "dashboard",
+    href: "dashboard",
+    label: "Dashboard",
+    icon: BarChart3,
+    permission: { resource: "dashboard", action: "view" },
+  },
+  {
+    key: "analytics",
+    href: "analytics",
+    label: "Analytics",
+    icon: FileBarChart2,
+    permission: { resource: "analytics", action: "view" },
+  },
+  {
+    key: "clients",
+    href: "clients",
+    label: "Clients",
+    icon: Users,
+    permission: { resource: "clients", action: "view" },
+  },
+  {
+    key: "reports",
+    href: "reports",
+    label: "Reports",
+    icon: Settings2,
+    permission: { resource: "reports", action: "view" },
+  },
+  {
+    key: "settings-team",
+    href: "settings/team",
+    label: "Team",
+    icon: UserCog,
+    permission: { resource: "team", action: "view" },
+  },
   {
     key: "settings-workspace",
     href: "settings/workspace",
     label: "Workspace",
     icon: ChevronsLeftRightEllipsis,
+    permission: { resource: "workspaceSettings", action: "view" },
+  },
+  {
+    key: "settings-billing",
+    href: "settings/billing",
+    label: "Billing",
+    icon: CreditCard,
+    permission: { resource: "billingInternal", action: "view" },
   },
 ];
 
@@ -41,6 +91,7 @@ export function DashboardShell({
   tenantSlug,
   workspaceName,
   roleLabel,
+  role,
 }: DashboardShellProps) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
@@ -87,7 +138,12 @@ export function DashboardShell({
           </div>
 
           <nav className="mt-6 space-y-2">
-            {navItems.map((item) => {
+            {navItems
+              .filter(
+                (item) =>
+                  !item.permission || hasRequiredPermission(role, item.permission),
+              )
+              .map((item) => {
               const Icon = item.icon;
               const href = `/${tenantSlug}/${item.href}`;
               const active = pathname === href;

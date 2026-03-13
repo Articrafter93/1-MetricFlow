@@ -1,3 +1,4 @@
+import { DateRangeProvider } from "@/components/dashboard/date-range-provider";
 import { DashboardShell } from "@/components/dashboard-shell";
 import { ROLE_LABELS } from "@/lib/roles";
 import { requireTenantPageContext } from "@/lib/tenant-context";
@@ -16,8 +17,9 @@ export default async function TenantLayout({ children, params }: TenantLayoutPro
       tenantSlug={tenantSlug}
       workspaceName={context.workspaceName}
       roleLabel={ROLE_LABELS[context.role]}
+      role={context.role}
     >
-      {children}
+      <DateRangeProvider>{children}</DateRangeProvider>
     </DashboardShell>
   );
 }

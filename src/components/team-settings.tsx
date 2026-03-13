@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import type { Role } from "@prisma/client";
+import { hasPermission } from "@/lib/rbac";
 import { ROLE_LABELS } from "@/lib/roles";
 
 type TeamMember = {
@@ -24,8 +25,7 @@ export function TeamSettings({ tenantSlug, currentRole, members }: TeamSettingsP
   const [sendEmail, setSendEmail] = useState(false);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
-
-  const canInvite = currentRole === "OWNER";
+  const canInvite = hasPermission(currentRole, "team", "invite");
 
   async function onInviteSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
