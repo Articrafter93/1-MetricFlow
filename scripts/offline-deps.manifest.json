@@ -1,0 +1,54 @@
+{
+  "dependencies": [
+    {
+      "name": "framer-motion",
+      "version": "12.35.2",
+      "file": "framer-motion-12.35.2.tgz",
+      "sha512": "REPLACE_WITH_SHA512_HEX"
+    },
+    {
+      "name": "pino",
+      "version": "9.9.5",
+      "file": "pino-9.9.5.tgz",
+      "sha512": "REPLACE_WITH_SHA512_HEX"
+    },
+    {
+      "name": "@tremor/react",
+      "version": "3.18.7",
+      "file": "tremor-react-3.18.7.tgz",
+      "sha512": "REPLACE_WITH_SHA512_HEX"
+    }
+  ],
+  "devDependencies": [
+    {
+      "name": "jest",
+      "version": "30.2.0",
+      "file": "jest-30.2.0.tgz",
+      "sha512": "REPLACE_WITH_SHA512_HEX"
+    },
+    {
+      "name": "@testing-library/react",
+      "version": "16.3.1",
+      "file": "testing-library-react-16.3.1.tgz",
+      "sha512": "REPLACE_WITH_SHA512_HEX"
+    },
+    {
+      "name": "@testing-library/jest-dom",
+      "version": "6.9.1",
+      "file": "testing-library-jest-dom-6.9.1.tgz",
+      "sha512": "REPLACE_WITH_SHA512_HEX"
+    },
+    {
+      "name": "jest-environment-jsdom",
+      "version": "30.2.0",
+      "file": "jest-environment-jsdom-30.2.0.tgz",
+      "sha512": "REPLACE_WITH_SHA512_HEX"
+    },
+    {
+      "name": "@types/jest",
+      "version": "30.0.0",
+      "file": "types-jest-30.0.0.tgz",
+      "sha512": "REPLACE_WITH_SHA512_HEX"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ SaaS B2B multi-tenant para analítica de agencias y franquicias, construido con 
 ## Arquitectura resumida
 
 - Frontend + Backend BFF: `Next.js App Router` + Route Handlers.
-- Auth: `NextAuth` con credenciales y sesión segura.
+- Auth: `NextAuth/Auth.js v5` con adapter Prisma y sesión persistente en DB.
 - RBAC: roles `OWNER`, `MANAGER`, `CLIENT`.
 - Multi-tenancy: aislamiento estricto por `workspaceId` en modelos y consultas.
 - DB: `PostgreSQL` vía `Prisma ORM`.
@@ -15,8 +15,8 @@ SaaS B2B multi-tenant para analítica de agencias y franquicias, construido con 
 
 ## Estructura
 
-- `src/app/dashboard/*` módulos de métricas, equipo y reportes.
-- `src/app/api/*` rutas backend (`metrics/live`, `team/invite`, `reports/pdf`).
+- `src/app/[tenantSlug]/*` módulos tenant-aware (dashboard, analytics, clients, reports, settings).
+- `src/app/api/tenants/[tenantSlug]/*` rutas backend privadas por tenant.
 - `src/lib/*` auth, tenancy, RBAC, métricas y utilidades.
 - `prisma/schema.prisma` modelo de datos multi-tenant.
 - `prisma/seed.ts` datos demo (Owner/Manager/Client).
@@ -30,7 +30,6 @@ Usa `.env.example` como base:
 DATABASE_URL="postgresql://metricflow:metricflow@localhost:5432/metricflow?schema=public"
 NEXTAUTH_SECRET="replace-with-strong-secret"
 NEXTAUTH_URL="http://localhost:3000"
-MOCK_DB_ENABLED="false"
 SMTP_HOST=""
 SMTP_PORT="587"
 SMTP_USER=""
@@ -47,13 +46,20 @@ MAIL_FROM=""
 5. `npm run db:seed`
 6. `npm run dev`
 
-## Modo Mock DB (temporal)
+## Dependencias sin bloqueos (registry interno)
 
-Si no hay base de datos productiva disponible, se puede activar modo mock:
+Para evitar bloqueos recurrentes por VPN/firewall, este repo soporta bootstrap via registry interno:
 
-- Define `MOCK_DB_ENABLED="true"` en Vercel (production).
-- Omite `DATABASE_URL` temporalmente.
-- El sistema usa usuarios demo en memoria para auth/RBAC y métricas sintéticas.
+1. Define `NPM_REGISTRY_URL`:
+   - PowerShell: `$env:NPM_REGISTRY_URL = "https://npm.company.internal/"`
+2. Verifica conectividad/config:
+   - `npm run deps:bootstrap:check`
+3. Instala dependencias base y valida build/test:
+   - `npm run deps:bootstrap`
+4. Si necesitas Tremor:
+   - `npm run deps:bootstrap:tremor`
+
+Referencia completa: `docs/dependency-registry-policy.md`.
 
 ## Desarrollo local (Docker Compose)
 
@@ -78,9 +84,9 @@ Si no hay base de datos productiva disponible, se puede activar modo mock:
 
 ## CI/CD
 
-Workflow en `.github/workflows/ci-cd.yml`:
+Workflow en `.github/workflows/quality-gate.yml`:
 
-1. Ejecuta `npm ci`, `npm run lint`, `npm run build`.
+1. Ejecuta `npm ci`, `npm run check`, `npm run test`, `npm run build`, `npm run test:smoke`.
 2. En `main`, despliega por `Git Integration` de Vercel (repo conectado).
 3. Opcionalmente, si existen secretos en GitHub, tambien ejecuta deploy por CLI:
    - `VERCEL_TOKEN`
@@ -101,4 +107,13 @@ Workflow en `.github/workflows/ci-cd.yml`:
 Comandos de cierre:
 
 - `npm run lint`
+- `npm run test`
 - `npm run build`
+
+## Operación (producción)
+
+Validar secretos mínimos en Vercel:
+
+```powershell
+npm run ops:vercel:env:check
+```

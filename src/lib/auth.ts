@@ -19,7 +19,7 @@ const resolvedAuthSecret =
 export const authConfig: NextAuthConfig = {
   adapter: PrismaAdapter(prisma),
   session: {
-    strategy: "jwt",
+    strategy: "database",
   },
   pages: {
     signIn: "/login",
@@ -86,14 +86,15 @@ export const authConfig: NextAuthConfig = {
   ],
   callbacks: {
     async session({ session, user }) {
-      if (!session.user || !user?.id) {
+      const userId = user?.id ?? session.user?.id;
+      if (!session.user || !userId) {
         return session;
       }
 
-      session.user.id = user.id;
+      session.user.id = userId;
 
       const membership = await prisma.membership.findFirst({
-        where: { userId: user.id },
+        where: { userId },
         include: { workspace: true },
         orderBy: { createdAt: "asc" },
       });

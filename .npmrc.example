@@ -1,0 +1,8 @@
+registry=https://npm.company.internal/
+strict-ssl=true
+
+; Optional scope mapping if your mirror uses scoped routing
+; @your-scope:registry=https://npm.company.internal/
+
+; Use token from environment (do not hardcode secrets)
+; //npm.company.internal/:_authToken=${NPM_TOKEN}

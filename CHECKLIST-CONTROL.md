@@ -1,7 +1,7 @@
 # CHECKLIST DE CONTROL - METRICFLOW
 
-> Ruta del proyecto: `C:\Users\g-cub\Antigravity projects\playground\1- MetricFlow`
-> Ultima actualizacion: 2026-03-07 (guides mock-first alineadas)
+> Ruta del proyecto: `C:\Users\g-cub\Antigravity projects\playground\proyectos\1-MetricFlow`
+> Ultima actualizacion: 2026-03-13 (iteracion estable + evidencia de cierre)
 > Responsable de actualizacion: Codex
 
 ## 1) Progreso general (Fases/GATEs)
@@ -51,7 +51,7 @@
 - [x] `docker-compose.yml` (web + postgres)
 - [x] `.env.example` + `.env.local` base
 - [x] `.gitignore` ajustado para `.env*` y `!.env.example`
-- [x] Workflow CI/CD en `.github/workflows/ci-cd.yml`
+- [x] Workflow CI/CD en `.github/workflows/quality-gate.yml`
 - [x] `README.md` pulido con arquitectura y pasos de ejecucion
 
 ### Documentacion de protocolo
@@ -97,8 +97,8 @@
   - [x] `VERCEL_ORG_ID` (GitHub Secret)
   - [x] `VERCEL_PROJECT_ID` (GitHub Secret)
   - [ ] `VERCEL_TOKEN` (GitHub Secret, opcional si se usa solo Git Integration)
-  - [x] `DATABASE_URL` (N/A temporal por decision de cliente: mock DB)
-  - [ ] `SMTP_*` (opcional para invitaciones por correo real)
+  - [ ] `DATABASE_URL` (production real requerido, pendiente)
+  - [ ] `SMTP_*` (pendiente para magic link/invitaciones reales)
 - [x] Deploy productivo en Vercel (skill `vrc`) ejecutado
 
 ### Cierre de workflow
@@ -106,14 +106,12 @@
 - [x] Cerrar GATE 10 (handover final)
 
 ### Bloqueadores activos
-- [x] Sin bloqueadores activos para fase mock.
-
-### Bloqueadores activos
-- [ ] Produccion bloqueada en auth (`/api/auth/error`) por configuracion incompleta de entorno en Vercel.
+- [ ] Produccion requiere `DATABASE_URL` real + `SMTP_*` para flujo auth/invitaciones end-to-end.
+- [ ] `MOCK_DB_ENABLED` sigue activo en Vercel production hasta completar secretos.
 
 ## 4) Warnings abiertos del audit (no bloqueantes)
 
-- [ ] Registrar trazabilidad adicional de ejecucion/GATEs para reducir warning `WF-005`.
+- [x] Registrar trazabilidad adicional de ejecucion/GATEs para reducir warning `WF-005` (ver `docs/gates-traceability.md`).
 
 ## 5) Bitacora de actualizaciones
 
@@ -139,6 +137,10 @@
 - [x] 2026-03-07: smoke productivo exitoso en modo mock (sign-in, dashboard, team, reports, export PDF).
 - [x] 2026-03-07: cierre de `GATE 9` y `GATE 10` en fase mock aprobada por cliente.
 - [x] 2026-03-07: alineadas ambas guias globales (`GUIA-CREACION-DESDE-CERO.md` y `GUIA-RENOVACION-SITIO-EXISTENTE.md`) con politica `mock-first`.
+- [x] 2026-03-13: `npm ci`, `npm run build` y `npm run test` verificados en verde con conectividad restaurada.
+- [x] 2026-03-13: agregado preflight de dependencias (`scripts/deps-preflight.mjs`) para fallar rapido ante bloqueo de red/VPN.
+- [x] 2026-03-13: warning `WF-005` cerrado con bitacora de trazabilidad en `docs/gates-traceability.md`.
+- [x] 2026-03-13: verificado en Vercel production que faltan `DATABASE_URL` y `SMTP_*` (script `ops:vercel:env:check`).
 
 ## 6) Regularizacion SaaS v2 (2026-03-13)
 
@@ -159,14 +161,12 @@
 - [x] Unit tests agregados para RBAC y calculo de métricas.
 - [x] Audit global actualizado: `PASS`.
 
-### Pendiente por bloqueo de entorno
+### Estado de dependencias (verificado 2026-03-13)
 - [x] `npm run build` ya no depende de descarga de Google Fonts en compile-time.
-- [ ] Migracion de dependencias no instalada por bloqueo a `registry.npmjs.org` en esta sesion:
-  - [x] NextAuth/Auth.js v5 beta + `@auth/prisma-adapter` migrados.
-  - [ ] Tremor
-  - [ ] Framer Motion
-  - [ ] Pino (logger)
-  - [ ] Jest + Testing Library
+- [x] `npm ci` completado en entorno con salida HTTPS al registry.
+- [x] NextAuth/Auth.js v5 beta + `@auth/prisma-adapter` instalados y en uso.
+- [x] Framer Motion, Pino y Jest + Testing Library instalados y validados.
+- [ ] Tremor pospuesto: conflicto de peer dependency con React 19 (`@tremor/react@3.x` requiere React 18). En esta iteracion se mantiene Recharts.
 
 ## 7) Iteracion estable (2026-03-13)
 

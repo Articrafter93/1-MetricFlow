@@ -12,6 +12,22 @@ Controles:
 - Dominio y callback de auth con HTTPS en produccion.
 - `MOCK_DB_ENABLED` deshabilitado en produccion.
 
+Verificacion automatizada de secretos en Vercel:
+```powershell
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/vercel-env-ensure.ps1 -Target production
+```
+
+Aplicar faltantes desde variables del proceso actual:
+```powershell
+$env:DATABASE_URL="postgresql://USER:PASS@HOST:6543/DB?sslmode=require"
+$env:SMTP_HOST="smtp.provider.com"
+$env:SMTP_PORT="587"
+$env:SMTP_USER="usuario"
+$env:SMTP_PASS="password"
+$env:MAIL_FROM="noreply@tu-dominio.com"
+pwsh -NoProfile -ExecutionPolicy Bypass -File scripts/vercel-env-ensure.ps1 -Target production -ApplyFromProcessEnv
+```
+
 ## 2) Inicializacion de datos (tenant demo)
 ```powershell
 $env:DATABASE_URL='postgresql://USER:PASS@HOST:5432/DB?sslmode=require'
