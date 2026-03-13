@@ -16,21 +16,27 @@ const resolvedAuthSecret =
   process.env.NEXTAUTH_SECRET ??
   (process.env.NODE_ENV !== "production" ? "metricflow-dev-secret" : undefined);
 
+const hasMagicLinkProvider = Boolean(
+  process.env.SMTP_HOST &&
+    process.env.SMTP_PORT &&
+    process.env.SMTP_USER &&
+    process.env.SMTP_PASS &&
+    process.env.MAIL_FROM,
+);
+
+const sessionStrategy = hasMagicLinkProvider ? "database" : "jwt";
+
 export const authConfig: NextAuthConfig = {
   adapter: PrismaAdapter(prisma),
   session: {
-    strategy: "database",
+    strategy: sessionStrategy,
   },
   pages: {
     signIn: "/login",
     verifyRequest: "/login?check-email=1",
   },
   providers: [
-    ...(process.env.SMTP_HOST &&
-    process.env.SMTP_PORT &&
-    process.env.SMTP_USER &&
-    process.env.SMTP_PASS &&
-    process.env.MAIL_FROM
+    ...(hasMagicLinkProvider
       ? [
           Email({
             server: {

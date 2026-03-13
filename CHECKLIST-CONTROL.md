@@ -141,8 +141,9 @@
 - [x] 2026-03-13: agregado preflight de dependencias (`scripts/deps-preflight.mjs`) para fallar rapido ante bloqueo de red/VPN.
 - [x] 2026-03-13: warning `WF-005` cerrado con bitacora de trazabilidad en `docs/gates-traceability.md`.
 - [x] 2026-03-13: verificado en Vercel production que faltan `DATABASE_URL` y `SMTP_*` (script `ops:vercel:env:check`).
-- [x] 2026-03-13: `session.strategy` migrado a `database` en `src/lib/auth.ts` y test de estrategia en verde.
+- [x] 2026-03-13: `session.strategy` ajustado a modo dinamico (`database` con magic link/SMTP y `jwt` temporal sin SMTP) para evitar `UnsupportedStrategy`.
 - [x] 2026-03-13: mitigado `ClientFetchError` de Auth en dev con fallback controlado para `GET /api/auth/session` cuando DB local no responde.
+- [x] 2026-03-13: verificado `GET /api/auth/session|providers|csrf` en `200` tras levantar `db` local y ajustar estrategia dinamica de Auth.
 
 ## 6) Regularizacion SaaS v2 (2026-03-13)
 
@@ -185,7 +186,7 @@
 - [x] Test RBAC ampliado para bloqueo Manager/Client y acceso Owner.
 
 ### PR-03 Auth y dashboard
-- [x] Sesion persistente en DB configurada (`session.strategy = "database"`).
+- [ ] Sesion persistente en DB activa al 100% (pendiente de `SMTP_*`; fallback temporal a `jwt` cuando no hay magic link provider).
 - [x] Provider global de rango de fechas en tenant layout.
 - [x] Deltas KPI consistentes en cards (MRR/clients/retention/churn).
 - [x] Migracion completa a Auth.js/NextAuth v5 beta aplicada en auth/route/proxy.
