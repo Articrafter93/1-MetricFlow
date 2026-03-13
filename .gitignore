@@ -43,6 +43,7 @@ next-env.d.ts
 
 # local dev logs
 .devserver*.log
+tmp-auth-capture.log
 
 # Antigravity security baseline
 .env
@@ -52,3 +53,6 @@ next-env.d.ts
 *.pfx
 id_rsa
 id_rsa*
+
+# local cache
+.npm-cache/
