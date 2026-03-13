@@ -31,6 +31,9 @@ test("calculateSummary computes MRR delta, retention and churn averages", () => 
   assert.equal(summary.mrr, 12000);
   assert.equal(summary.activeClients, 8);
   assert.equal(summary.mrrDelta, 0.2);
+  assert.equal(summary.activeClientsDelta, 0);
   assert.equal(summary.retentionRate, 0.91);
+  assert.ok(Math.abs(summary.retentionDelta - 0.02) < 1e-9);
   assert.equal(summary.churnRate, 0.09);
+  assert.ok(Math.abs(summary.churnDelta - -0.02) < 1e-9);
 });

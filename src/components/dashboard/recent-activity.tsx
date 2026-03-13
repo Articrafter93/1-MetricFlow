@@ -12,6 +12,11 @@ export function RecentActivity({ events }: RecentActivityProps) {
         <p className="text-sm text-text-secondary">Eventos recientes del workspace.</p>
       </header>
       <div className="space-y-2">
+        {events.length === 0 ? (
+          <p className="text-sm text-text-secondary">
+            No hay actividad reciente para este rango.
+          </p>
+        ) : null}
         {events.map((event) => (
           <article
             key={event.id}
@@ -25,4 +30,3 @@ export function RecentActivity({ events }: RecentActivityProps) {
     </section>
   );
 }
-

@@ -12,6 +12,24 @@ function cellStyle(value: number) {
 }
 
 export function CohortHeatmap({ cohorts }: CohortHeatmapProps) {
+  if (cohorts.length === 0) {
+    return (
+      <section className="glass-panel overflow-x-auto p-4">
+        <header className="mb-3">
+          <h2 className="text-base font-semibold text-text-primary">
+            Retention Cohort Heatmap
+          </h2>
+          <p className="text-sm text-text-secondary">
+            Cohortes por mes con degradado de retencion.
+          </p>
+        </header>
+        <p className="text-sm text-text-secondary">
+          No hay datos de cohortes para el rango seleccionado.
+        </p>
+      </section>
+    );
+  }
+
   return (
     <section className="glass-panel overflow-x-auto p-4">
       <header className="mb-3">
@@ -56,4 +74,3 @@ export function CohortHeatmap({ cohorts }: CohortHeatmapProps) {
     </section>
   );
 }
-

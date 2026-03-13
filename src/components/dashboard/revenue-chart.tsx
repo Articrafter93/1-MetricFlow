@@ -78,25 +78,30 @@ export function RevenueChart({
         </div>
       ) : null}
 
-      <div className="h-72">
-        <ResponsiveContainer width="100%" height="100%">
-          <LineChart data={points}>
-            <CartesianGrid stroke="#2A2A3A" strokeDasharray="4 4" />
-            <XAxis dataKey="date" stroke="#8888AA" tick={{ fontSize: 11 }} />
-            <YAxis stroke="#8888AA" tick={{ fontSize: 11 }} />
-            <Tooltip
-              contentStyle={{
-                backgroundColor: "#1A1A24",
-                border: "1px solid #2A2A3A",
-                borderRadius: "10px",
-                color: "#F0F0FF",
-              }}
-            />
-            <Line type="monotone" dataKey="mrr" stroke="#7C6FCD" dot={false} strokeWidth={2} />
-          </LineChart>
-        </ResponsiveContainer>
-      </div>
+      {points.length === 0 ? (
+        <p className="text-sm text-text-secondary">
+          No hay puntos de ingresos para el rango seleccionado.
+        </p>
+      ) : (
+        <div className="h-72">
+          <ResponsiveContainer width="100%" height="100%">
+            <LineChart data={points}>
+              <CartesianGrid stroke="#2A2A3A" strokeDasharray="4 4" />
+              <XAxis dataKey="date" stroke="#8888AA" tick={{ fontSize: 11 }} />
+              <YAxis stroke="#8888AA" tick={{ fontSize: 11 }} />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#1A1A24",
+                  border: "1px solid #2A2A3A",
+                  borderRadius: "10px",
+                  color: "#F0F0FF",
+                }}
+              />
+              <Line type="monotone" dataKey="mrr" stroke="#7C6FCD" dot={false} strokeWidth={2} />
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+      )}
     </section>
   );
 }
-

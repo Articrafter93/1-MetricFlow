@@ -13,7 +13,7 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
     action: "view",
   });
 
-  const metrics = await getWorkspaceMetrics(context.workspaceId, { range: "90d" });
+  const metrics = await getWorkspaceMetrics(context.workspaceId, { range: "30d" });
 
   return (
     <section className="space-y-4">
@@ -31,4 +31,3 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
     </section>
   );
 }
-

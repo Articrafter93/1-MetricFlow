@@ -13,6 +13,8 @@ export async function proxy(request: NextRequest) {
   const tenantApiMatch = pathname.match(/^\/api\/tenants\/([^/]+)\//);
 
   const sessionCookiePresent =
+    request.cookies.has("__Secure-authjs.session-token") ||
+    request.cookies.has("authjs.session-token") ||
     request.cookies.has("__Secure-next-auth.session-token") ||
     request.cookies.has("next-auth.session-token");
 

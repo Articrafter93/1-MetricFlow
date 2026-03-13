@@ -2,11 +2,12 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { CohortHeatmap } from "@/components/dashboard/cohort-heatmap";
+import { useDateRange } from "@/components/dashboard/date-range-provider";
 import { FunnelOverview } from "@/components/dashboard/funnel-overview";
 import { KpiCards } from "@/components/dashboard/kpi-cards";
 import { RecentActivity } from "@/components/dashboard/recent-activity";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
-import type { MetricsRange, MetricsResponse } from "@/lib/metrics";
+import type { MetricsResponse } from "@/lib/metrics";
 
 type MetricPanelsProps = {
   tenantSlug: string;
@@ -20,10 +21,9 @@ export function MetricPanels({
   initialData,
 }: MetricPanelsProps) {
   const [data, setData] = useState(initialData);
-  const [range, setRange] = useState<MetricsRange>(initialData.range);
-  const [customFrom, setCustomFrom] = useState("");
-  const [customTo, setCustomTo] = useState("");
   const [loading, setLoading] = useState(false);
+  const { range, customFrom, customTo, setRange, setCustomFrom, setCustomTo } =
+    useDateRange();
 
   const queryString = useMemo(() => {
     const query = new URLSearchParams({ range });
@@ -35,6 +35,10 @@ export function MetricPanels({
   }, [customFrom, customTo, range]);
 
   const canFetchMetrics = range !== "custom" || (customFrom && customTo);
+
+  useEffect(() => {
+    setData(initialData);
+  }, [initialData]);
 
   useEffect(() => {
     if (!canFetchMetrics) {

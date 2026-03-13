@@ -6,8 +6,11 @@ type Summary = {
   mrr: number;
   mrrDelta: number;
   activeClients: number;
+  activeClientsDelta: number;
   retentionRate: number;
+  retentionDelta: number;
   churnRate: number;
+  churnDelta: number;
 };
 
 type KpiCardsProps = {
@@ -42,14 +45,19 @@ function KpiCard({
   value,
   delta,
   suffix = "",
+  invertDeltaColors = false,
 }: {
   label: string;
   value: number;
   delta?: number;
   suffix?: string;
+  invertDeltaColors?: boolean;
 }) {
   const animated = useAnimatedValue(value);
   const integerFormatter = useMemo(() => new Intl.NumberFormat("en-US"), []);
+  const isPositive = (delta ?? 0) >= 0;
+  const shouldUseSuccess = invertDeltaColors ? !isPositive : isPositive;
+  const arrow = isPositive ? "↑" : "↓";
 
   return (
     <article className="metric-card">
@@ -59,8 +67,8 @@ function KpiCard({
         {suffix}
       </p>
       {typeof delta === "number" ? (
-        <p className={delta >= 0 ? "metric-delta-success" : "metric-delta-danger"}>
-          {delta >= 0 ? "+" : ""}
+        <p className={shouldUseSuccess ? "metric-delta-success" : "metric-delta-danger"}>
+          {arrow} {isPositive ? "+" : ""}
           {(delta * 100).toFixed(1)}%
         </p>
       ) : null}
@@ -72,14 +80,24 @@ export function KpiCards({ summary }: KpiCardsProps) {
   return (
     <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
       <KpiCard label="MRR" value={summary.mrr} delta={summary.mrrDelta} />
-      <KpiCard label="Clientes Activos" value={summary.activeClients} />
+      <KpiCard
+        label="Clientes Activos"
+        value={summary.activeClients}
+        delta={summary.activeClientsDelta}
+      />
       <KpiCard
         label="Tasa de Retencion"
         value={summary.retentionRate * 100}
+        delta={summary.retentionDelta}
         suffix="%"
       />
-      <KpiCard label="Churn Rate" value={summary.churnRate * 100} suffix="%" />
+      <KpiCard
+        label="Churn Rate"
+        value={summary.churnRate * 100}
+        delta={summary.churnDelta}
+        suffix="%"
+        invertDeltaColors
+      />
     </section>
   );
 }
-
