@@ -39,6 +39,7 @@ jobs:
             --config p/javascript \
             --config p/typescript \
             --config p/secrets \
+            --config .semgrep/tenant-isolation.yml \
             --exclude node_modules \
             --exclude .next \
             --exclude dist \

@@ -48,21 +48,25 @@ export type MetricsResponse = {
     mrr: number;
     mrrDelta: number;
     activeClients: number;
+    activeClientsDelta: number;
     retentionRate: number;
+    retentionDelta: number;
     churnRate: number;
+    churnDelta: number;
   };
   funnel: FunnelSummary;
   cohorts: CohortRow[];
   recentActivity: ActivityEntry[];
 };
 
-function deterministicNoise(seed: string, min: number, max: number) {
-  let hash = 0;
-  for (let index = 0; index < seed.length; index += 1) {
-    hash = (hash * 33 + seed.charCodeAt(index)) >>> 0;
+export class MetricsAccessError extends Error {
+  status: number;
+
+  constructor(status: number, message: string) {
+    super(message);
+    this.name = "MetricsAccessError";
+    this.status = status;
   }
-  const normalized = hash / 4294967295;
-  return min + normalized * (max - min);
 }
 
 function getDateRange(input: MetricsQueryInput) {
@@ -90,44 +94,28 @@ function getDateRange(input: MetricsQueryInput) {
   };
 }
 
-function buildSamplePoints(
-  workspaceId: string,
-  startDate: Date,
-  endDate: Date,
-): MetricPoint[] {
-  const spanInDays =
-    Math.max(
-      1,
-      Math.floor((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24)) + 1,
-    ) || 1;
-
-  return Array.from({ length: spanInDays }).map((_, index) => {
-    const date = subDays(endDate, spanInDays - index - 1);
-    const visits =
-      900 + index * 28 + Math.round(deterministicNoise(`${workspaceId}-${index}-v`, 10, 180));
-    const leads = Math.max(1, Math.round(visits * (0.1 + deterministicNoise(`${index}-l`, 0, 0.06))));
-    const deals = Math.max(1, Math.round(leads * (0.18 + deterministicNoise(`${index}-d`, 0, 0.08))));
-    const mrr = 12000 + index * 70 + Math.round(deterministicNoise(`${workspaceId}-${index}-m`, 20, 450));
-    const retention = 0.85 + deterministicNoise(`${workspaceId}-${index}-r`, 0, 0.12);
-    const conversion = leads > 0 ? deals / leads : 0;
-    const churn = 1 - retention;
-
-    return {
-      date: date.toISOString().slice(0, 10),
-      visits,
-      leads,
-      deals,
-      mrr,
-      retention,
-      conversion,
-      churn,
-    };
-  });
+function safeDelta(current: number, previous: number) {
+  if (previous === 0) {
+    return 0;
+  }
+  return (current - previous) / previous;
 }
 
-export function calculateSummary(points: MetricPoint[], activeClients: number) {
-  const firstMrr = points[0]?.mrr ?? 0;
-  const lastMrr = points[points.length - 1]?.mrr ?? 0;
+export function calculateSummary(
+  points: MetricPoint[],
+  activeClients: number,
+  previousActiveClients = activeClients,
+) {
+  const first = points[0];
+  const last = points[points.length - 1];
+
+  const firstMrr = first?.mrr ?? 0;
+  const lastMrr = last?.mrr ?? 0;
+  const firstRetention = first?.retention ?? 0;
+  const lastRetention = last?.retention ?? 0;
+  const firstChurn = first?.churn ?? 0;
+  const lastChurn = last?.churn ?? 0;
+
   const retentionRate =
     points.length > 0
       ? points.reduce((acc, point) => acc + point.retention, 0) / points.length
@@ -139,10 +127,13 @@ export function calculateSummary(points: MetricPoint[], activeClients: number) {
 
   return {
     mrr: lastMrr,
-    mrrDelta: firstMrr === 0 ? 0 : (lastMrr - firstMrr) / firstMrr,
+    mrrDelta: safeDelta(lastMrr, firstMrr),
     activeClients,
+    activeClientsDelta: safeDelta(activeClients, previousActiveClients),
     retentionRate,
+    retentionDelta: lastRetention - firstRetention,
     churnRate,
+    churnDelta: lastChurn - firstChurn,
   };
 }
 
@@ -162,7 +153,11 @@ function buildFunnel(points: MetricPoint[]): FunnelSummary {
 }
 
 function buildCohorts(points: MetricPoint[]): CohortRow[] {
-  const base = points.length > 0 ? points[points.length - 1].retention : 0.82;
+  if (points.length === 0) {
+    return [];
+  }
+
+  const base = points[points.length - 1].retention;
 
   return Array.from({ length: 6 }).map((_, rowIndex) => {
     const monthOffset = 5 - rowIndex;
@@ -180,6 +175,10 @@ function buildCohorts(points: MetricPoint[]): CohortRow[] {
 }
 
 function buildRecentActivity(points: MetricPoint[]): ActivityEntry[] {
+  if (points.length === 0) {
+    return [];
+  }
+
   return points
     .slice(-6)
     .reverse()
@@ -193,11 +192,57 @@ function buildRecentActivity(points: MetricPoint[]): ActivityEntry[] {
     }));
 }
 
+async function ensureClientInWorkspace(workspaceId: string, clientId: string) {
+  const clientCount = await prisma.clientAccount.count({
+    where: {
+      id: clientId,
+      workspaceId,
+    },
+  });
+
+  if (clientCount === 0) {
+    throw new MetricsAccessError(
+      403,
+      "Client does not belong to the requested workspace.",
+    );
+  }
+}
+
+function deriveActiveClientDeltas(
+  clientIds: Array<string | null>,
+  fallbackActiveClients: number,
+) {
+  const validIds = clientIds.filter((value): value is string => Boolean(value));
+  if (validIds.length === 0) {
+    return {
+      activeClients: fallbackActiveClients,
+      previousActiveClients: fallbackActiveClients,
+    };
+  }
+
+  const splitIndex = Math.max(1, Math.floor(validIds.length / 2));
+  const previousSlice = validIds.slice(0, splitIndex);
+  const currentSlice = validIds.slice(splitIndex);
+
+  const previousActiveClients = new Set(previousSlice).size;
+  const currentActiveClients =
+    currentSlice.length > 0 ? new Set(currentSlice).size : previousActiveClients;
+
+  return {
+    activeClients: currentActiveClients,
+    previousActiveClients,
+  };
+}
+
 export async function getWorkspaceMetrics(
   workspaceId: string,
   input: MetricsQueryInput,
 ): Promise<MetricsResponse> {
   const range = getDateRange(input);
+
+  if (input.clientId) {
+    await ensureClientInWorkspace(workspaceId, input.clientId);
+  }
 
   const snapshots = await prisma.metricSnapshot.findMany({
     where: {
@@ -222,19 +267,16 @@ export async function getWorkspaceMetrics(
     },
   });
 
-  const points =
-    snapshots.length > 0
-      ? snapshots.map((snapshot) => ({
-          date: snapshot.metricDate.toISOString().slice(0, 10),
-          visits: snapshot.funnelVisits,
-          leads: snapshot.funnelLeads,
-          deals: snapshot.funnelDeals,
-          mrr: Number(snapshot.mrr),
-          retention: snapshot.retentionRate,
-          conversion: snapshot.conversionRate,
-          churn: snapshot.churnRate,
-        }))
-      : buildSamplePoints(workspaceId, range.startDate, range.endDate);
+  const points = snapshots.map((snapshot) => ({
+    date: snapshot.metricDate.toISOString().slice(0, 10),
+    visits: snapshot.funnelVisits,
+    leads: snapshot.funnelLeads,
+    deals: snapshot.funnelDeals,
+    mrr: Number(snapshot.mrr),
+    retention: snapshot.retentionRate,
+    conversion: snapshot.conversionRate,
+    churn: snapshot.churnRate,
+  }));
 
   const activeClients = input.clientId
     ? 1
@@ -246,14 +288,18 @@ export async function getWorkspaceMetrics(
         ).size
       : await prisma.clientAccount.count({ where: { workspaceId } });
 
+  const { previousActiveClients } = deriveActiveClientDeltas(
+    snapshots.map((snapshot) => snapshot.clientAccountId),
+    activeClients,
+  );
+
   return {
     range: input.range,
     rangeLabel: range.label,
     points,
-    summary: calculateSummary(points, activeClients),
+    summary: calculateSummary(points, activeClients, previousActiveClients),
     funnel: buildFunnel(points),
     cohorts: buildCohorts(points),
     recentActivity: buildRecentActivity(points),
   };
 }
-

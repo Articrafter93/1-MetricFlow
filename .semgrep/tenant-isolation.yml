@@ -1,0 +1,15 @@
+rules:
+  - id: tenant-api-prisma-must-use-tenant-context
+    message: "Private tenant API queries must include tenantContext.workspaceId."
+    languages:
+      - typescript
+    severity: ERROR
+    paths:
+      include:
+        - src/app/api/tenants/**/*.ts
+    patterns:
+      - pattern: prisma.$MODEL.$METHOD($ARGS)
+      - metavariable-regex:
+          metavariable: $METHOD
+          regex: "^(findMany|findFirst|count|create|update|upsert|deleteMany|delete)$"
+      - pattern-not: prisma.$MODEL.$METHOD(... tenantContext.workspaceId ...)

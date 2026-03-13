@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { appLogger } from "@/lib/logger";
-import { getWorkspaceMetrics } from "@/lib/metrics";
+import { MetricsAccessError, getWorkspaceMetrics } from "@/lib/metrics";
 import {
   TenantContextError,
   requireTenantApiContext,
@@ -55,6 +55,9 @@ export async function GET(request: NextRequest, context: RouteContext) {
     return NextResponse.json(metrics);
   } catch (error) {
     if (error instanceof TenantContextError) {
+      return NextResponse.json({ error: error.message }, { status: error.status });
+    }
+    if (error instanceof MetricsAccessError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
     }
     appLogger.error("metrics-live-failed", { tenantSlug });
