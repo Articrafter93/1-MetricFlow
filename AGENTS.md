@@ -14,3 +14,9 @@ Desde este momento, para este proyecto, queda estrictamente prohibido acceder, l
 ## Alcance
 
 Esta regla aplica a todo comando de exploracion, diagnostico, lectura, escritura y automatizacion usado en este repositorio.
+
+## Excepcion autorizada por el usuario
+
+- Se autoriza iniciar y usar Docker Desktop / `docker compose` cuando sea necesario para continuar procesos de desarrollo, build, pruebas o diagnostico de este proyecto.
+- Se autoriza crear, leer y editar skills fuera de `C:\Users\g-cub\Antigravity projects\` exclusivamente para gestion de skills (por ejemplo, en `C:\Users\g-cub\.codex\skills\`).
+- Esta excepcion no habilita exploracion general fuera del entorno; solo aplica a archivos de skills.

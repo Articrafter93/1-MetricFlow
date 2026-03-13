@@ -141,6 +141,8 @@
 - [x] 2026-03-13: agregado preflight de dependencias (`scripts/deps-preflight.mjs`) para fallar rapido ante bloqueo de red/VPN.
 - [x] 2026-03-13: warning `WF-005` cerrado con bitacora de trazabilidad en `docs/gates-traceability.md`.
 - [x] 2026-03-13: verificado en Vercel production que faltan `DATABASE_URL` y `SMTP_*` (script `ops:vercel:env:check`).
+- [x] 2026-03-13: `session.strategy` migrado a `database` en `src/lib/auth.ts` y test de estrategia en verde.
+- [x] 2026-03-13: mitigado `ClientFetchError` de Auth en dev con fallback controlado para `GET /api/auth/session` cuando DB local no responde.
 
 ## 6) Regularizacion SaaS v2 (2026-03-13)
 
