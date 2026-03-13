@@ -144,6 +144,7 @@
 - [x] 2026-03-13: `session.strategy` ajustado a modo dinamico (`database` con magic link/SMTP y `jwt` temporal sin SMTP) para evitar `UnsupportedStrategy`.
 - [x] 2026-03-13: mitigado `ClientFetchError` de Auth en dev con fallback controlado para `GET /api/auth/session` cuando DB local no responde.
 - [x] 2026-03-13: verificado `GET /api/auth/session|providers|csrf` en `200` tras levantar `db` local y ajustar estrategia dinamica de Auth.
+- [x] 2026-03-13: aclarada discrepancia entre `main` y rama `feat/iteracion-estable-pr01-pr05` sobre dependencias; la rama de iteracion estable contiene `next-auth v5`, `framer-motion`, `pino`, `jest` y Testing Library en `package.json`.
 
 ## 6) Regularizacion SaaS v2 (2026-03-13)
 
@@ -169,7 +170,9 @@
 - [x] `npm ci` completado en entorno con salida HTTPS al registry.
 - [x] NextAuth/Auth.js v5 beta + `@auth/prisma-adapter` instalados y en uso.
 - [x] Framer Motion, Pino y Jest + Testing Library instalados y validados.
+- [x] Recharts aprobado oficialmente para esta iteracion por compatibilidad con React 19.
 - [ ] Tremor pospuesto: conflicto de peer dependency con React 19 (`@tremor/react@3.x` requiere React 18). En esta iteracion se mantiene Recharts.
+- [x] Runner de pruebas activo: `tsx --test` (Node test runner). Jest/Testing Library quedan instalados para pruebas de componentes/UI en siguientes ciclos.
 
 ## 7) Iteracion estable (2026-03-13)
 
