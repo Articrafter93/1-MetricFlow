@@ -160,10 +160,42 @@
 - [x] Audit global actualizado: `PASS`.
 
 ### Pendiente por bloqueo de entorno
-- [ ] `npm run build` local bloqueado por falta de acceso de red para descargar Google Fonts (`Inter`, `JetBrains Mono`) en `next/font/google`.
+- [x] `npm run build` ya no depende de descarga de Google Fonts en compile-time.
 - [ ] Migracion de dependencias no instalada por bloqueo a `registry.npmjs.org` en esta sesion:
-  - [ ] NextAuth/Auth.js v5
+  - [x] NextAuth/Auth.js v5 beta + `@auth/prisma-adapter` migrados.
   - [ ] Tremor
   - [ ] Framer Motion
   - [ ] Pino (logger)
   - [ ] Jest + Testing Library
+
+## 7) Iteracion estable (2026-03-13)
+
+### PR-01 Tenant isolation hardening
+- [x] `getWorkspaceMetrics` valida `clientId` contra `workspaceId` antes de consultar.
+- [x] Se elimina fallback sintetico de metricas en runtime (estado vacio explicito).
+- [x] Test agregado: `tests/tenant-isolation.test.ts`.
+- [x] Regla Semgrep custom agregada: `.semgrep/tenant-isolation.yml`.
+
+### PR-02 RBAC declarativo + billing owner-only
+- [x] Politica RBAC extendida con `billingInternal`.
+- [x] Componente declarativo `<RequireRole />` agregado para UI sensible.
+- [x] Ruta Owner-only: `/(app)/[tenantSlug]/settings/billing`.
+- [x] Test RBAC ampliado para bloqueo Manager/Client y acceso Owner.
+
+### PR-03 Auth y dashboard
+- [x] Sesion persistente en DB configurada (`session.strategy = "database"`).
+- [x] Provider global de rango de fechas en tenant layout.
+- [x] Deltas KPI consistentes en cards (MRR/clients/retention/churn).
+- [x] Migracion completa a Auth.js/NextAuth v5 beta aplicada en auth/route/proxy.
+
+### PR-04 Reportes API/PDF
+- [x] Endpoint canonico `POST /api/tenants/[tenantSlug]/reports`.
+- [x] Compatibilidad temporal preservada con `/reports/pdf`.
+- [x] PDF white-label ampliado con KPI + embudo + tabla de tendencia MRR.
+- [x] Reuso de validacion tenant/client para impedir descargas cruzadas por `clientId`.
+
+### PR-05 Documentacion y runbook
+- [x] `docs/rbac.md` creado.
+- [x] `docs/multi-tenancy.md` creado.
+- [x] `RUNBOOK-CIERRE-GOLIVE.md` actualizado a rutas por tenant y checks de seguridad.
+- [x] Build offline endurecido removiendo fetch de Google Fonts en compile-time.

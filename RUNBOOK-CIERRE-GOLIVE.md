@@ -1,48 +1,58 @@
 # RUNBOOK CIERRE GO-LIVE (GATE 9/10)
 
-## Objetivo
-Cerrar los pendientes finales del cliente para dejar MetricFlow en cumplimiento total.
+## 1) Variables de entorno y seguridad minima
+Validar en Vercel/GitHub:
+- `DATABASE_URL` (pooling habilitado).
+- `NEXTAUTH_SECRET` y `NEXTAUTH_URL`.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `MAIL_FROM` (si hay magic link/invitaciones por correo).
+- `VERCEL_TOKEN`, `VERCEL_ORG_ID`, `VERCEL_PROJECT_ID` para deploy CI.
 
-## 1) Configurar base de datos productiva (bloqueante)
+Controles:
+- No exponer secretos en logs/commits.
+- Dominio y callback de auth con HTTPS en produccion.
+- `MOCK_DB_ENABLED` deshabilitado en produccion.
 
-1. Provisionar PostgreSQL gestionado (preferido: Supabase o AWS).
-2. Copiar la cadena de conexion (`DATABASE_URL`) productiva.
-3. Cargarla en Vercel:
-
-```powershell
-'postgresql://USER:PASS@HOST:5432/DB?sslmode=require' | vercel env add DATABASE_URL production
-```
-
-## 2) Inicializar esquema y datos base en la DB productiva
-
+## 2) Inicializacion de datos (tenant demo)
 ```powershell
 $env:DATABASE_URL='postgresql://USER:PASS@HOST:5432/DB?sslmode=require'
 npm run db:push
 npm run db:seed
 ```
 
-## 3) Redeploy de produccion
+Esperado:
+- Workspace demo con slug `metricflow-demo`.
+- Usuarios demo Owner/Manager/Client.
 
+## 3) Quality gate local antes de deploy
+```powershell
+npm run lint
+npm run test
+npm run build
+npm run test:smoke
+```
+
+## 4) Deploy de produccion
 ```powershell
 vercel --prod --yes
 ```
 
-## 4) Smoke test de autenticacion
+## 5) Smoke multi-tenant por rutas con slug
+Con un tenant valido (`metricflow-demo`):
+- `/login`
+- `/metricflow-demo/dashboard`
+- `/metricflow-demo/analytics`
+- `/metricflow-demo/clients`
+- `/metricflow-demo/reports`
+- `/metricflow-demo/settings/team`
+- `/metricflow-demo/settings/workspace`
+- `/metricflow-demo/settings/billing` (Owner only)
 
-Validar:
-- `/sign-in` carga correctamente.
-- Login `owner@metricflow.dev / Demo12345!` entra a `/dashboard`.
-- Acceso a `/dashboard/team` y `/dashboard/reports`.
-- Export PDF responde sin error.
+APIs:
+- `GET /api/tenants/metricflow-demo/metrics/live?range=30d`
+- `POST /api/tenants/metricflow-demo/reports`
+- `PATCH /api/tenants/metricflow-demo/settings/workspace`
 
-## 5) Cierre formal de control
-
+## 6) Cierre documental
 Actualizar:
-- `CHECKLIST-CONTROL.md`
-  - Marcar `DATABASE_URL` en production como resuelto.
-  - Cerrar `GATE 9` y `GATE 10`.
-- `REDO-TRACKING.md`
-  - `GATE_9_STATUS: APROBADO`
-  - `GATE_10_STATUS: APROBADO`
-- `INSTRUCCIONES-CLIENTE-METRICFLOW.md`
-  - Cambiar `ARQ-02`, `DEV-03`, `SEC-01` a `Cumple` (si aplica tras validacion).
+- `CHECKLIST-CONTROL.md` con estado de PR-01..PR-05 y evidencias.
+- `docs/multi-tenancy.md` y `docs/rbac.md` si cambia politica.

@@ -13,7 +13,9 @@ const criticalPaths = [
   "src/app/(app)/[tenantSlug]/reports/page.tsx",
   "src/app/(app)/[tenantSlug]/settings/team/page.tsx",
   "src/app/(app)/[tenantSlug]/settings/workspace/page.tsx",
+  "src/app/(app)/[tenantSlug]/settings/billing/page.tsx",
   "src/app/privacidad/page.tsx",
+  "src/app/api/tenants/[tenantSlug]/reports/route.ts",
 ];
 
 const missing = [];
@@ -35,4 +37,3 @@ if (missing.length > 0) {
 }
 
 console.log("Smoke passed. Critical routes are present.");
-
