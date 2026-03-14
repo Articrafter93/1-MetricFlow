@@ -109,6 +109,12 @@
 - [ ] Produccion requiere `DATABASE_URL` real + `SMTP_*` para flujo auth/invitaciones end-to-end.
 - [ ] `MOCK_DB_ENABLED` sigue activo en Vercel production hasta completar secretos.
 
+### Deuda tecnica activa (pre-merge)
+- [x] Confirmado que `package-lock.json` esta sincronizado con `package.json` en el estado actual con tarballs (`framer-motion` y `dom-accessibility-api` por URL).
+- [ ] Normalizar dependencias de tarball a semver cuando el entorno permita salida estable a npm (`framer-motion: "12.35.2"` y `dom-accessibility-api: "0.5.16"`).
+- [ ] Fecha limite de normalizacion semver: **2026-03-31**.
+- [ ] Al normalizar: ejecutar `npm install`, regenerar lockfile y validar `npm ci`, `npm run build`, `npm run test` en CI limpio.
+
 ## 4) Warnings abiertos del audit (no bloqueantes)
 
 - [x] Registrar trazabilidad adicional de ejecucion/GATEs para reducir warning `WF-005` (ver `docs/gates-traceability.md`).
@@ -145,6 +151,7 @@
 - [x] 2026-03-13: mitigado `ClientFetchError` de Auth en dev con fallback controlado para `GET /api/auth/session` cuando DB local no responde.
 - [x] 2026-03-13: verificado `GET /api/auth/session|providers|csrf` en `200` tras levantar `db` local y ajustar estrategia dinamica de Auth.
 - [x] 2026-03-13: aclarada discrepancia entre `main` y rama `feat/iteracion-estable-pr01-pr05` sobre dependencias; la rama de iteracion estable contiene `next-auth v5`, `framer-motion`, `pino`, `jest` y Testing Library en `package.json`.
+- [x] 2026-03-13: registrada deuda tecnica de normalizacion semver para dependencias instaladas via tarball URL (deadline `2026-03-31`) y verificada sincronia de lockfile.
 
 ## 6) Regularizacion SaaS v2 (2026-03-13)
 

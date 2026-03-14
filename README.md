@@ -61,6 +61,17 @@ Para evitar bloqueos recurrentes por VPN/firewall, este repo soporta bootstrap v
 
 Referencia completa: `docs/dependency-registry-policy.md`.
 
+### Scripts operativos (entorno restringido)
+
+- `npm run deps:preflight`: valida conectividad TCP/HTTPS al registry configurado (`npm_config_registry` o `registry.npmjs.org`) y falla rapido con pasos de remediacion si no hay salida de red.
+- `npm run deps:bootstrap`: configura `.npmrc` del proyecto con `NPM_REGISTRY_URL`, valida acceso (`npm ping`), instala dependencias base y ejecuta `build` + `test`.
+- `npm run deps:bootstrap:tremor`: mismo flujo de `deps:bootstrap`, agregando `@tremor/react` para ciclos que lo requieran.
+- `npm run deps:offline:check`: valida manifest y checksums SHA-512 del bundle offline sin instalar paquetes.
+- `npm run deps:offline`: instala dependencias desde `vendor/npm-bundle` en modo `npm --offline --prefer-offline` y ejecuta checks de build/test.
+- `npm run ops:vercel:env:check`: auditoria de variables requeridas en Vercel (`production`), reporta faltantes y retorna error si hay huecos.
+
+`ops:vercel:env:check` no debe ejecutarse a ciegas en pipelines no controlados: trabaja sobre variables de entorno productivas y su script subyacente (`scripts/vercel-env-ensure.ps1`) solo debe usarse con `-ApplyFromProcessEnv` cuando exista aprobacion explicita para escribir/rotar secretos.
+
 ## Desarrollo local (Docker Compose)
 
 1. `docker compose up -d db`
