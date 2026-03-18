@@ -1,4 +1,4 @@
-import { MetricPanels } from "@/components/metric-panels";
+import { MetricPanelsClientShell } from "@/components/metric-panels-client-shell";
 import { getWorkspaceMetrics } from "@/lib/metrics";
 import { requireTenantPageContext } from "@/lib/tenant-context";
 
@@ -23,7 +23,7 @@ export default async function AnalyticsPage({ params }: AnalyticsPageProps) {
           Vista extendida con filtros por rango y embudo para el tenant actual.
         </p>
       </div>
-      <MetricPanels
+      <MetricPanelsClientShell
         tenantSlug={tenantSlug}
         workspaceName={context.workspaceName}
         initialData={metrics}

@@ -1,4 +1,4 @@
-import { MetricPanels } from "@/components/metric-panels";
+import { MetricPanelsClientShell } from "@/components/metric-panels-client-shell";
 import { getWorkspaceMetrics } from "@/lib/metrics";
 import { requireTenantPageContext } from "@/lib/tenant-context";
 
@@ -16,11 +16,10 @@ export default async function DashboardPage({ params }: DashboardPageProps) {
   const metrics = await getWorkspaceMetrics(context.workspaceId, { range: "30d" });
 
   return (
-    <MetricPanels
+    <MetricPanelsClientShell
       tenantSlug={tenantSlug}
       workspaceName={context.workspaceName}
       initialData={metrics}
     />
   );
 }
-

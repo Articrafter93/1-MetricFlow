@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   CartesianGrid,
   Line,
   LineChart,
-  ResponsiveContainer,
   Tooltip,
   XAxis,
   YAxis,
@@ -32,14 +31,30 @@ export function RevenueChart({
   onCustomToChange,
 }: RevenueChartProps) {
   const [chartReady, setChartReady] = useState(false);
+  const [chartSize, setChartSize] = useState({ width: 0, height: 0 });
+  const chartFrameRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    const frame = window.requestAnimationFrame(() => {
-      setChartReady(true);
-    });
+    const node = chartFrameRef.current;
+    if (!node) {
+      return;
+    }
+
+    const updateReadiness = () => {
+      const { width, height } = node.getBoundingClientRect();
+      setChartSize({ width, height });
+      setChartReady(width > 0 && height > 0);
+    };
+
+    updateReadiness();
+
+    const frame = window.requestAnimationFrame(updateReadiness);
+    const observer = new ResizeObserver(updateReadiness);
+    observer.observe(node);
 
     return () => {
       window.cancelAnimationFrame(frame);
+      observer.disconnect();
     };
   }, []);
 
@@ -95,12 +110,12 @@ export function RevenueChart({
         <p className="text-sm text-text-secondary">
           No hay puntos de ingresos para el rango seleccionado.
         </p>
-      ) : !chartReady ? (
-        <div className="h-72 rounded-xl border border-border bg-bg-elevated" />
       ) : (
-        <div className="h-72 min-w-0">
-          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={288}>
-            <LineChart data={points}>
+        <div ref={chartFrameRef} className="h-72 min-w-0">
+          {!chartReady ? (
+            <div className="h-72 rounded-xl border border-border bg-bg-elevated" />
+          ) : (
+            <LineChart data={points} width={chartSize.width} height={chartSize.height}>
               <CartesianGrid stroke="#2A2A3A" strokeDasharray="4 4" />
               <XAxis dataKey="date" stroke="#8888AA" tick={{ fontSize: 11 }} />
               <YAxis stroke="#8888AA" tick={{ fontSize: 11 }} />
@@ -112,9 +127,16 @@ export function RevenueChart({
                   color: "#F0F0FF",
                 }}
               />
-              <Line type="monotone" dataKey="mrr" stroke="#7C6FCD" dot={false} strokeWidth={2} />
+              <Line
+                type="monotone"
+                dataKey="mrr"
+                stroke="#7C6FCD"
+                dot={false}
+                strokeWidth={2}
+                isAnimationActive={false}
+              />
             </LineChart>
-          </ResponsiveContainer>
+          )}
         </div>
       )}
     </section>
