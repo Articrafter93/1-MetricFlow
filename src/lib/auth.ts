@@ -208,6 +208,9 @@ export const authConfig: NextAuthConfig = {
       return session;
     },
   },
+  session: {
+    strategy: isDemoMode() ? "jwt" : "database",
+  },
   secret: resolvedAuthSecret ?? (isDemoMode() ? "metricflow-demo-secret" : undefined),
 };
 
