@@ -14,6 +14,7 @@ declare module "next-auth" {
       workspaceId?: string;
       workspaceSlug?: string;
       workspaceName?: string;
+      workspaceLogoUrl?: string | null;
     };
   }
 }
@@ -24,5 +25,6 @@ declare module "next-auth/jwt" {
     workspaceId?: string;
     workspaceSlug?: string;
     workspaceName?: string;
+    workspaceLogoUrl?: string | null;
   }
 }

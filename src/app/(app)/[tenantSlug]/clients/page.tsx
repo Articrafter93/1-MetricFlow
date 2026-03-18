@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/db";
+import { DEMO_WORKSPACE, getDemoClients } from "@/lib/demo-mode";
 import { ClientsPanel } from "@/components/clients-panel";
 import { requireTenantPageContext } from "@/lib/tenant-context";
 
@@ -13,16 +14,19 @@ export default async function ClientsPage({ params }: ClientsPageProps) {
     action: "view",
   });
 
-  const clients = await prisma.clientAccount.findMany({
-    where: { workspaceId: context.workspaceId },
-    orderBy: { createdAt: "desc" },
-    select: {
-      id: true,
-      name: true,
-      timezone: true,
-      createdAt: true,
-    },
-  });
+  const clients =
+    context.workspaceId === DEMO_WORKSPACE.id
+      ? getDemoClients()
+      : await prisma.clientAccount.findMany({
+          where: { workspaceId: context.workspaceId },
+          orderBy: { createdAt: "desc" },
+          select: {
+            id: true,
+            name: true,
+            timezone: true,
+            createdAt: true,
+          },
+        });
 
   return (
     <ClientsPanel
@@ -30,9 +34,11 @@ export default async function ClientsPage({ params }: ClientsPageProps) {
       role={context.role}
       initialClients={clients.map((client) => ({
         ...client,
-        createdAt: client.createdAt.toISOString(),
+        createdAt:
+          typeof client.createdAt === "string"
+            ? client.createdAt
+            : client.createdAt.toISOString(),
       }))}
     />
   );
 }
-

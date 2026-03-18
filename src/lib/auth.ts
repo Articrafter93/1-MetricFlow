@@ -1,9 +1,10 @@
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import { compare } from "bcryptjs";
-import NextAuth, { type NextAuthConfig } from "next-auth";
+import NextAuth, { type NextAuthConfig, type User as NextAuthUser } from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import Email from "next-auth/providers/email";
 import { z } from "zod";
+import { getDemoAuthUser, getDemoUserProfileById, isDemoMode } from "@/lib/demo-mode";
 import { prisma } from "@/lib/db";
 
 const credentialsSchema = z.object({
@@ -82,6 +83,13 @@ export const authConfig: NextAuthConfig = {
           return null;
         }
 
+        const demoUser = isDemoMode()
+          ? getDemoAuthUser(parsed.data.email, parsed.data.password)
+          : null;
+        if (demoUser) {
+          return demoUser as unknown as NextAuthUser;
+        }
+
         const user = await prisma.user.findUnique({
           where: { email: parsed.data.email.toLowerCase() },
           select: {
@@ -118,11 +126,41 @@ export const authConfig: NextAuthConfig = {
 
       token.sub = userId;
 
+      const demoProfile = isDemoMode() ? getDemoUserProfileById(userId) : null;
+      if (demoProfile) {
+        token.role = demoProfile.role;
+        token.workspaceId = demoProfile.workspaceId;
+        token.workspaceSlug = demoProfile.workspaceSlug;
+        token.workspaceName = demoProfile.workspaceName;
+        token.workspaceLogoUrl = demoProfile.workspaceLogoUrl;
+        return token;
+      }
+
+      const enrichedUser = user as
+        | (NextAuthUser & {
+            role?: typeof token.role;
+            workspaceId?: string;
+            workspaceSlug?: string;
+            workspaceName?: string;
+            workspaceLogoUrl?: string | null;
+          })
+        | undefined;
+
+      if (enrichedUser?.workspaceId) {
+        token.role = enrichedUser.role;
+        token.workspaceId = enrichedUser.workspaceId;
+        token.workspaceSlug = enrichedUser.workspaceSlug;
+        token.workspaceName = enrichedUser.workspaceName;
+        token.workspaceLogoUrl = enrichedUser.workspaceLogoUrl;
+        return token;
+      }
+
       const membership = await getPrimaryMembership(userId);
       token.role = membership?.role;
       token.workspaceId = membership?.workspaceId;
       token.workspaceSlug = membership?.workspace.slug;
       token.workspaceName = membership?.workspace.name;
+      token.workspaceLogoUrl = membership?.workspace.logoUrl ?? null;
 
       return token;
     },
@@ -134,11 +172,28 @@ export const authConfig: NextAuthConfig = {
 
       session.user.id = userId;
 
-      if (token?.role || token?.workspaceId || token?.workspaceSlug || token?.workspaceName) {
+      if (
+        token?.role ||
+        token?.workspaceId ||
+        token?.workspaceSlug ||
+        token?.workspaceName ||
+        token?.workspaceLogoUrl
+      ) {
         session.user.role = token.role;
         session.user.workspaceId = token.workspaceId;
         session.user.workspaceSlug = token.workspaceSlug;
         session.user.workspaceName = token.workspaceName;
+        session.user.workspaceLogoUrl = token.workspaceLogoUrl ?? null;
+        return session;
+      }
+
+      const demoProfile = isDemoMode() ? getDemoUserProfileById(userId) : null;
+      if (demoProfile) {
+        session.user.role = demoProfile.role;
+        session.user.workspaceId = demoProfile.workspaceId;
+        session.user.workspaceSlug = demoProfile.workspaceSlug;
+        session.user.workspaceName = demoProfile.workspaceName;
+        session.user.workspaceLogoUrl = demoProfile.workspaceLogoUrl;
         return session;
       }
 
@@ -148,11 +203,12 @@ export const authConfig: NextAuthConfig = {
       session.user.workspaceId = membership?.workspaceId;
       session.user.workspaceSlug = membership?.workspace.slug;
       session.user.workspaceName = membership?.workspace.name;
+      session.user.workspaceLogoUrl = membership?.workspace.logoUrl ?? null;
 
       return session;
     },
   },
-  secret: resolvedAuthSecret,
+  secret: resolvedAuthSecret ?? (isDemoMode() ? "metricflow-demo-secret" : undefined),
 };
 
 const nextAuth = NextAuth(authConfig);

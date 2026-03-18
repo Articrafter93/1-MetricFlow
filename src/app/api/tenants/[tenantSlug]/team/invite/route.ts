@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { Role } from "@prisma/client";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { DEMO_WORKSPACE } from "@/lib/demo-mode";
 import { prisma } from "@/lib/db";
 import { appLogger } from "@/lib/logger";
 import { sendInviteEmail } from "@/lib/mailer";
@@ -42,6 +43,16 @@ export async function POST(request: NextRequest, context: RouteContext) {
     const token = crypto.randomBytes(32).toString("hex");
     const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24 * 3);
     const baseUrl = process.env.NEXTAUTH_URL ?? "http://localhost:3000";
+
+    if (tenantContext.workspaceId === DEMO_WORKSPACE.id) {
+      const demoToken = `demo-${token}`;
+      return NextResponse.json({
+        inviteUrl: `${baseUrl}/invite/${demoToken}`,
+        expiresAt,
+        sentEmail: false,
+      });
+    }
+
     const inviteUrl = `${baseUrl}/invite/${token}`;
 
     const invite = await prisma.teamInvite.create({
