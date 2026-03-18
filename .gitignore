@@ -46,6 +46,7 @@ next-env.d.ts
 # local dev logs
 .devserver*.log
 tmp-auth-capture.log
+.tmp*
 
 # Antigravity security baseline
 .env
