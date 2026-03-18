@@ -1,4 +1,5 @@
 import { subDays } from "date-fns";
+import { DEMO_CLIENT, DEMO_WORKSPACE, getDemoWorkspaceMetrics } from "@/lib/demo-mode";
 import { prisma } from "@/lib/db";
 
 export type MetricsRange = "7d" | "30d" | "90d" | "custom";
@@ -238,6 +239,17 @@ export async function getWorkspaceMetrics(
   workspaceId: string,
   input: MetricsQueryInput,
 ): Promise<MetricsResponse> {
+  if (workspaceId === DEMO_WORKSPACE.id) {
+    if (input.clientId && input.clientId !== DEMO_CLIENT.id) {
+      throw new MetricsAccessError(
+        403,
+        "Client does not belong to the requested workspace.",
+      );
+    }
+
+    return getDemoWorkspaceMetrics(input);
+  }
+
   const range = getDateRange(input);
 
   if (input.clientId) {

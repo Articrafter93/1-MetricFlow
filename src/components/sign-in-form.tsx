@@ -5,10 +5,13 @@ import { useSearchParams } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 
+const DEMO_EMAIL = "owner@metricflow.dev";
+const DEMO_PASSWORD = "Demo12345!";
+
 export function SignInForm() {
   const searchParams = useSearchParams();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState(DEMO_EMAIL);
+  const [password, setPassword] = useState(DEMO_PASSWORD);
   const [privacyConsent, setPrivacyConsent] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -48,20 +51,20 @@ export function SignInForm() {
 
     try {
       const csrfToken = await getCsrfToken();
-      const body = new URLSearchParams({
-        email,
-        password,
-        csrfToken,
-        callbackUrl,
-      });
-
+      const absoluteCallbackUrl = new URL(callbackUrl, window.location.origin).toString();
       const response = await fetch("/api/auth/callback/credentials", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
         },
-        body,
+        body: new URLSearchParams({
+          email,
+          password,
+          csrfToken,
+          callbackUrl: absoluteCallbackUrl,
+        }),
         credentials: "include",
+        redirect: "manual",
       });
 
       setLoading(false);
@@ -71,7 +74,7 @@ export function SignInForm() {
         return;
       }
 
-      window.location.href = callbackUrl;
+      window.location.href = absoluteCallbackUrl;
     } catch {
       setLoading(false);
       setError("No fue posible iniciar sesion.");
@@ -114,6 +117,10 @@ export function SignInForm() {
       <h1 className="text-2xl font-semibold tracking-tight">MetricFlow</h1>
       <p className="mt-2 text-sm text-text-secondary">
         Accede a tu workspace multi-tenant con aislamiento de datos por agencia.
+      </p>
+      <p className="mt-3 rounded-lg border border-accent/40 bg-accent/10 p-3 text-xs text-text-secondary">
+        Demo visible para reclutadores: <span className="font-semibold text-text-primary">{DEMO_EMAIL}</span> /
+        <span className="font-semibold text-text-primary"> {DEMO_PASSWORD}</span>
       </p>
 
       {invite ? (

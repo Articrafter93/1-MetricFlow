@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { DEMO_WORKSPACE } from "@/lib/demo-mode";
 import { prisma } from "@/lib/db";
 import { appLogger } from "@/lib/logger";
 import {
@@ -31,6 +32,15 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
         { error: "Invalid payload", details: parsed.error.flatten() },
         { status: 400 },
       );
+    }
+
+    if (tenantContext.workspaceId === DEMO_WORKSPACE.id) {
+      return NextResponse.json({
+        id: tenantContext.workspaceId,
+        slug: tenantContext.workspaceSlug,
+        name: parsed.data.name,
+        logoUrl: parsed.data.logoUrl,
+      });
     }
 
     const workspace = await prisma.workspace.update({

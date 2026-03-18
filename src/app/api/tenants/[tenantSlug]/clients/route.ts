@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { DEMO_WORKSPACE, getDemoClients } from "@/lib/demo-mode";
 import { prisma } from "@/lib/db";
 import { appLogger } from "@/lib/logger";
 import {
@@ -24,6 +25,10 @@ export async function GET(_: NextRequest, context: RouteContext) {
       resource: "clients",
       action: "view",
     });
+
+    if (tenantContext.workspaceId === DEMO_WORKSPACE.id) {
+      return NextResponse.json({ clients: getDemoClients() });
+    }
 
     const clients = await prisma.clientAccount.findMany({
       where: { workspaceId: tenantContext.workspaceId },
@@ -60,6 +65,20 @@ export async function POST(request: NextRequest, context: RouteContext) {
       return NextResponse.json(
         { error: "Invalid payload", details: parsed.error.flatten() },
         { status: 400 },
+      );
+    }
+
+    if (tenantContext.workspaceId === DEMO_WORKSPACE.id) {
+      return NextResponse.json(
+        {
+          client: {
+            id: `demo-${Date.now()}`,
+            name: parsed.data.name,
+            timezone: parsed.data.timezone,
+            createdAt: new Date().toISOString(),
+          },
+        },
+        { status: 201 },
       );
     }
 

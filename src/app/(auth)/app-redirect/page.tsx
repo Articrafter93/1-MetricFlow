@@ -8,6 +8,10 @@ export default async function AppRedirectPage() {
     redirect("/login");
   }
 
+  if (session.user.workspaceSlug && session.user.workspaceId) {
+    redirect(`/${session.user.workspaceSlug}/dashboard`);
+  }
+
   const membership = await prisma.membership.findFirst({
     where: { userId: session.user.id },
     include: { workspace: true },
@@ -20,4 +24,3 @@ export default async function AppRedirectPage() {
 
   redirect(`/${membership.workspace.slug}/dashboard`);
 }
-
