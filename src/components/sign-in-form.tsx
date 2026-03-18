@@ -17,6 +17,23 @@ export function SignInForm() {
   const invite = searchParams.get("invite");
   const callbackUrl = invite ? `/invite/${invite}?accept=1` : "/app-redirect";
 
+  async function getCsrfToken() {
+    const response = await fetch("/api/auth/csrf", {
+      credentials: "include",
+    });
+
+    if (!response.ok) {
+      throw new Error("No fue posible iniciar la sesion.");
+    }
+
+    const payload = (await response.json()) as { csrfToken?: string };
+    if (!payload.csrfToken) {
+      throw new Error("No fue posible validar la sesion.");
+    }
+
+    return payload.csrfToken;
+  }
+
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
@@ -29,21 +46,36 @@ export function SignInForm() {
 
     setLoading(true);
 
-    const result = await signIn("credentials", {
-      email,
-      password,
-      callbackUrl,
-      redirect: false,
-    });
+    try {
+      const csrfToken = await getCsrfToken();
+      const body = new URLSearchParams({
+        email,
+        password,
+        csrfToken,
+        callbackUrl,
+      });
 
-    setLoading(false);
+      const response = await fetch("/api/auth/callback/credentials", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body,
+        credentials: "include",
+      });
 
-    if (!result || result.error) {
-      setError("Credenciales invalidas.");
-      return;
+      setLoading(false);
+
+      if (response.status >= 400) {
+        setError("Credenciales invalidas.");
+        return;
+      }
+
+      window.location.href = callbackUrl;
+    } catch {
+      setLoading(false);
+      setError("No fue posible iniciar sesion.");
     }
-
-    window.location.href = result.url ?? callbackUrl;
   }
 
   async function requestMagicLink() {

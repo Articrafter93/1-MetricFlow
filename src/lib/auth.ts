@@ -16,15 +16,25 @@ const resolvedAuthSecret =
   process.env.NEXTAUTH_SECRET ??
   (process.env.NODE_ENV !== "production" ? "metricflow-dev-secret" : undefined);
 
+function hasEnvValue(value: string | undefined) {
+  if (!value) {
+    return false;
+  }
+
+  const normalized = value.replace(/^"(.*)"$/, "$1").trim();
+  return normalized.length > 0;
+}
+
 const hasMagicLinkProvider = Boolean(
-  process.env.SMTP_HOST &&
-    process.env.SMTP_PORT &&
-    process.env.SMTP_USER &&
-    process.env.SMTP_PASS &&
-    process.env.MAIL_FROM,
+  hasEnvValue(process.env.SMTP_HOST) &&
+    hasEnvValue(process.env.SMTP_PORT) &&
+    hasEnvValue(process.env.SMTP_USER) &&
+    hasEnvValue(process.env.SMTP_PASS) &&
+    hasEnvValue(process.env.MAIL_FROM),
 );
 
 const sessionStrategy = hasMagicLinkProvider ? "database" : "jwt";
+const adapter = hasMagicLinkProvider ? PrismaAdapter(prisma) : undefined;
 
 async function getPrimaryMembership(userId: string) {
   return prisma.membership.findFirst({
@@ -35,7 +45,7 @@ async function getPrimaryMembership(userId: string) {
 }
 
 export const authConfig: NextAuthConfig = {
-  adapter: PrismaAdapter(prisma),
+  adapter,
   trustHost: true,
   session: {
     strategy: sessionStrategy,
