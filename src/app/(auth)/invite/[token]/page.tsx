@@ -21,6 +21,12 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
     return (
       <div className="auth-bg flex min-h-screen items-center justify-center px-4">
         <section className="glass-panel w-full max-w-lg p-6">
+          <Link
+            href="/"
+            className="text-xs font-semibold uppercase tracking-[0.18em] text-text-secondary"
+          >
+            Volver al inicio
+          </Link>
           <h1 className="text-xl font-semibold text-text-primary">Invitacion no valida</h1>
           <p className="mt-2 text-sm text-text-secondary">
             El enlace expiro o ya no existe. Solicita una nueva invitacion al owner del workspace.
@@ -69,6 +75,12 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
   return (
     <div className="auth-bg flex min-h-screen items-center justify-center px-4">
       <section className="glass-panel w-full max-w-lg p-6">
+        <Link
+          href="/"
+          className="text-xs font-semibold uppercase tracking-[0.18em] text-text-secondary"
+        >
+          Volver al inicio
+        </Link>
         <h1 className="text-xl font-semibold text-text-primary">Invitacion a workspace</h1>
         <p className="mt-2 text-sm text-text-secondary">
           Fuiste invitado a <strong>{invite.workspace.name}</strong> como{" "}
@@ -85,4 +97,3 @@ export default async function InvitePage({ params, searchParams }: InvitePagePro
     </div>
   );
 }
-

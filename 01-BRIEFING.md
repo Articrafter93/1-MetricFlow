@@ -5,7 +5,7 @@
 - Sector: SaaS B2B (analytics multi-tenant)
 - Persona de contacto: No definida en briefing inicial
 - Fecha: 2026-03-07
-- Ruta de trabajo: `c:\Users\g-cub\Antigravity projects\playground\1- MetricFlow`
+- Ruta de trabajo: `c:\Users\g-cub\Antigravity projects\proyectos\1- MetricFlow`
 
 ## Objetivo principal (1-3 frases)
 Construir una plataforma SaaS B2B multi-tenant para agencias y franquicias que permita gestionar clientes en workspaces aislados, visualizar métricas complejas en tiempo casi real y operar con control estricto de roles.
@@ -69,12 +69,12 @@ Construir una plataforma SaaS B2B multi-tenant para agencias y franquicias que p
 - Otros: exportación PDF
 
 ## Campos mínimos de protocolo (check explícito)
-- Carpeta destino: `c:\Users\g-cub\Antigravity projects\playground\1- MetricFlow`
+- Carpeta destino: `c:\Users\g-cub\Antigravity projects\proyectos\1- MetricFlow`
 - API requerida: SI (BFF interna)
 - Redes oficiales del cliente: Por definir (pendiente de entrega de URLs oficiales)
 
 ## Campos mínimos (formato auditoría)
-- Ruta destino (ruta absoluta): `c:\Users\g-cub\Antigravity projects\playground\1- MetricFlow`
+- Ruta destino (ruta absoluta): `c:\Users\g-cub\Antigravity projects\proyectos\1- MetricFlow`
 - API requerida para operación plena (si/no/por confirmar): si
 - Redes sociales oficiales y URLs validadas:
   - Sitio corporativo: pendiente (https://por-definir)
@@ -88,3 +88,4 @@ Construir una plataforma SaaS B2B multi-tenant para agencias y franquicias que p
 
 ## Gate 1
 Estado: APROBADO (implícito por briefing detallado entregado por cliente en esta sesión).
+

@@ -23,12 +23,19 @@ export function TeamSettings({ tenantSlug, currentRole, members }: TeamSettingsP
   const [email, setEmail] = useState("");
   const [role, setRole] = useState<Role>("MANAGER");
   const [sendEmail, setSendEmail] = useState(false);
+  const [privacyConsent, setPrivacyConsent] = useState(false);
   const [inviteUrl, setInviteUrl] = useState<string | null>(null);
   const [status, setStatus] = useState<string | null>(null);
   const canInvite = hasPermission(currentRole, "team", "invite");
 
   async function onInviteSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+
+    if (!privacyConsent) {
+      setStatus("Debes confirmar el tratamiento del email invitado segun la politica de privacidad.");
+      return;
+    }
+
     setStatus("Creando invitacion...");
     setInviteUrl(null);
 
@@ -131,6 +138,25 @@ export function TeamSettings({ tenantSlug, currentRole, members }: TeamSettingsP
             Enviar tambien por email (SMTP)
           </label>
 
+          <label className="flex items-start gap-2 rounded-lg border border-border bg-bg-elevated p-3 text-sm text-text-primary">
+            <input
+              type="checkbox"
+              required
+              checked={privacyConsent}
+              onChange={(event) => setPrivacyConsent(event.target.checked)}
+              className="mt-0.5 h-4 w-4 accent-accent"
+              disabled={!canInvite}
+            />
+            <span>
+              Confirmo que el email invitado cuenta con autorizacion para ser procesado segun
+              la{" "}
+              <Link href="/privacidad" className="text-accent underline underline-offset-2">
+                politica de privacidad
+              </Link>
+              .
+            </span>
+          </label>
+
           <button
             type="submit"
             disabled={!canInvite}
@@ -138,15 +164,6 @@ export function TeamSettings({ tenantSlug, currentRole, members }: TeamSettingsP
           >
             Generar invitacion
           </button>
-
-          <p className="text-xs text-text-secondary">
-            El email invitado se procesa segun la{" "}
-            <Link href="/privacidad" className="text-accent underline underline-offset-2">
-              politica de privacidad
-            </Link>
-            .
-          </p>
-
           {status ? <p className="text-sm text-text-secondary">{status}</p> : null}
           {inviteUrl ? (
             <div className="rounded-lg border border-border bg-bg-elevated p-3 text-xs text-text-primary">

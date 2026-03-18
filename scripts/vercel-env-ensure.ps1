@@ -41,7 +41,7 @@ function Get-ConfiguredEnvNames {
     }
   }
 
-  return $names | Select-Object -Unique
+  return @($names | Select-Object -Unique)
 }
 
 function Set-VercelEnvFromProcess {
@@ -63,7 +63,7 @@ function Set-VercelEnvFromProcess {
   }
 }
 
-$configured = Get-ConfiguredEnvNames -EnvironmentTarget $Target
+$configured = @(Get-ConfiguredEnvNames -EnvironmentTarget $Target)
 $missing = @($required | Where-Object { $_ -notin $configured })
 
 Write-Host "OK target=$Target"
@@ -87,7 +87,7 @@ foreach ($name in $missing) {
   Write-Host "OK applied=$name"
 }
 
-$configuredAfter = Get-ConfiguredEnvNames -EnvironmentTarget $Target
+$configuredAfter = @(Get-ConfiguredEnvNames -EnvironmentTarget $Target)
 $stillMissing = @($required | Where-Object { $_ -notin $configuredAfter })
 if ($stillMissing.Count -gt 0) {
   throw "Aun faltan variables: $($stillMissing -join ',')"

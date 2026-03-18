@@ -1,7 +1,7 @@
 # CHECKLIST DE CONTROL - METRICFLOW
 
-> Ruta del proyecto: `C:\Users\g-cub\Antigravity projects\playground\proyectos\1-MetricFlow`
-> Ultima actualizacion: 2026-03-13 (iteracion estable + evidencia de cierre)
+> Ruta del proyecto: `C:\Users\g-cub\Antigravity projects\proyectos\1-MetricFlow`
+> Ultima actualizacion: 2026-03-18 (regularizacion auth + revision-final)
 > Responsable de actualizacion: Codex
 
 ## 1) Progreso general (Fases/GATEs)
@@ -21,7 +21,7 @@
 
 ### Setup y arquitectura
 - [x] Activacion de skill `init` + preflight completo (GEMINI/INDEX/WORKFLOW/GUIA)
-- [x] Scaffold de proyecto Next.js + TypeScript + Tailwind + ESLint
+- [x] Scaffold de proyecto Next.js + TypeScript + Tailwind + ESLint (Tailwind usado como capa utilitaria con direccion visual custom documentada)
 - [x] Configuracion de scripts de build/lint/db
 - [x] Definicion de arquitectura multi-tenant + RBAC
 - [x] Modelo Prisma implementado con `workspaceId` como base de aislamiento
@@ -87,7 +87,7 @@
   - [x] `npm run db:seed`
   - [x] Login con usuarios demo y recorrido completo por dashboard/team/reports
 
-### Integracion externa (pendiente de aprobacion)
+### Integracion externa y hardening post-handover
 - [x] Crear commits semanticos finales
 - [x] Sincronizar GitHub remoto (skill `gh`)
 - [ ] Configurar secretos de Vercel/GitHub (`DATABASE_URL`, `NEXTAUTH_SECRET`, `VERCEL_*`, SMTP)
@@ -105,9 +105,9 @@
 - [x] Cerrar GATE 9 (go-live)
 - [x] Cerrar GATE 10 (handover final)
 
-### Bloqueadores activos
-- [ ] Produccion requiere `DATABASE_URL` real + `SMTP_*` para flujo auth/invitaciones end-to-end.
-- [ ] `MOCK_DB_ENABLED` sigue activo en Vercel production hasta completar secretos.
+### Seguimiento post-handover (no bloqueante para la fase mock aprobada)
+- [ ] Produccion real aun requiere `DATABASE_URL` + `SMTP_*` para auth/invitaciones sobre infraestructura final.
+- [ ] Ejecutar nueva `revision-final` especifica de produccion real cuando se complete el alta de secretos e integraciones externas.
 
 ### Deuda tecnica activa (pre-merge)
 - [x] Confirmado que `package-lock.json` esta sincronizado con `package.json` en el estado actual con tarballs (`framer-motion` y `dom-accessibility-api` por URL).
@@ -142,7 +142,7 @@
 - [x] 2026-03-07: implementado modo mock DB en auth/workspace/metrics/team/invite para operar sin `DATABASE_URL`.
 - [x] 2026-03-07: smoke productivo exitoso en modo mock (sign-in, dashboard, team, reports, export PDF).
 - [x] 2026-03-07: cierre de `GATE 9` y `GATE 10` en fase mock aprobada por cliente.
-- [x] 2026-03-07: alineadas ambas guias globales (`GUIA-CREACION-DESDE-CERO.md` y `GUIA-RENOVACION-SITIO-EXISTENTE.md`) con politica `mock-first`.
+- [x] 2026-03-07: alineadas ambas guias globales (`01-EXECUTION-PLAYBOOK.md` y `01-EXECUTION-PLAYBOOK.md`) con politica `mock-first`.
 - [x] 2026-03-13: `npm ci`, `npm run build` y `npm run test` verificados en verde con conectividad restaurada.
 - [x] 2026-03-13: agregado preflight de dependencias (`scripts/deps-preflight.mjs`) para fallar rapido ante bloqueo de red/VPN.
 - [x] 2026-03-13: warning `WF-005` cerrado con bitacora de trazabilidad en `docs/gates-traceability.md`.
@@ -152,6 +152,10 @@
 - [x] 2026-03-13: verificado `GET /api/auth/session|providers|csrf` en `200` tras levantar `db` local y ajustar estrategia dinamica de Auth.
 - [x] 2026-03-13: aclarada discrepancia entre `main` y rama `feat/iteracion-estable-pr01-pr05` sobre dependencias; la rama de iteracion estable contiene `next-auth v5`, `framer-motion`, `pino`, `jest` y Testing Library en `package.json`.
 - [x] 2026-03-13: registrada deuda tecnica de normalizacion semver para dependencias instaladas via tarball URL (deadline `2026-03-31`) y verificada sincronia de lockfile.
+- [x] 2026-03-18: corregido enriquecimiento de sesion `jwt`/`session` para propagar `user.id`, `role` y `workspace*` cuando no hay SMTP.
+- [x] 2026-03-18: regularizada DB local con `db:push` + `db:seed` cargando envs desde `.env.local` sin exponer secretos.
+- [x] 2026-03-18: agregados opt-in explicitos de privacidad y retorno a Home en pantallas publicas auditadas.
+- [x] 2026-03-18: pasada Playwright local repetida con login Owner, `app-redirect`, dashboard tenant, endpoint `POST /api/tenants/[tenantSlug]/reports` y pagina `/privacidad`.
 
 ## 6) Regularizacion SaaS v2 (2026-03-13)
 
@@ -212,3 +216,4 @@
 - [x] `docs/multi-tenancy.md` creado.
 - [x] `RUNBOOK-CIERRE-GOLIVE.md` actualizado a rutas por tenant y checks de seguridad.
 - [x] Build offline endurecido removiendo fetch de Google Fonts en compile-time.
+
