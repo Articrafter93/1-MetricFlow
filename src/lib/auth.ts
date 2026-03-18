@@ -34,7 +34,7 @@ const hasMagicLinkProvider = Boolean(
     hasEnvValue(process.env.MAIL_FROM),
 );
 
-const sessionStrategy = hasMagicLinkProvider ? "database" : "jwt";
+const sessionStrategy = isDemoMode() || !hasMagicLinkProvider ? "jwt" : "database";
 const adapter = hasMagicLinkProvider ? PrismaAdapter(prisma) : undefined;
 
 async function getPrimaryMembership(userId: string) {
@@ -207,9 +207,6 @@ export const authConfig: NextAuthConfig = {
 
       return session;
     },
-  },
-  session: {
-    strategy: isDemoMode() ? "jwt" : "database",
   },
   secret: resolvedAuthSecret ?? (isDemoMode() ? "metricflow-demo-secret" : undefined),
 };
