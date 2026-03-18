@@ -26,8 +26,17 @@ const hasMagicLinkProvider = Boolean(
 
 const sessionStrategy = hasMagicLinkProvider ? "database" : "jwt";
 
+async function getPrimaryMembership(userId: string) {
+  return prisma.membership.findFirst({
+    where: { userId },
+    include: { workspace: true },
+    orderBy: { createdAt: "asc" },
+  });
+}
+
 export const authConfig: NextAuthConfig = {
   adapter: PrismaAdapter(prisma),
+  trustHost: true,
   session: {
     strategy: sessionStrategy,
   },
@@ -91,19 +100,39 @@ export const authConfig: NextAuthConfig = {
     }),
   ],
   callbacks: {
-    async session({ session, user }) {
-      const userId = user?.id ?? session.user?.id;
+    async jwt({ token, user }) {
+      const userId = user?.id ?? token.sub;
+      if (!userId) {
+        return token;
+      }
+
+      token.sub = userId;
+
+      const membership = await getPrimaryMembership(userId);
+      token.role = membership?.role;
+      token.workspaceId = membership?.workspaceId;
+      token.workspaceSlug = membership?.workspace.slug;
+      token.workspaceName = membership?.workspace.name;
+
+      return token;
+    },
+    async session({ session, user, token }) {
+      const userId = user?.id ?? token?.sub ?? session.user?.id;
       if (!session.user || !userId) {
         return session;
       }
 
       session.user.id = userId;
 
-      const membership = await prisma.membership.findFirst({
-        where: { userId },
-        include: { workspace: true },
-        orderBy: { createdAt: "asc" },
-      });
+      if (token?.role || token?.workspaceId || token?.workspaceSlug || token?.workspaceName) {
+        session.user.role = token.role;
+        session.user.workspaceId = token.workspaceId;
+        session.user.workspaceSlug = token.workspaceSlug;
+        session.user.workspaceName = token.workspaceName;
+        return session;
+      }
+
+      const membership = await getPrimaryMembership(userId);
 
       session.user.role = membership?.role;
       session.user.workspaceId = membership?.workspaceId;

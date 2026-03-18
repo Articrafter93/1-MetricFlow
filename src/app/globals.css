@@ -35,9 +35,16 @@
 
 body {
   min-height: 100vh;
+  width: 100%;
   background: radial-gradient(circle at top left, #171727 0%, #0a0a0f 45%);
   color: var(--text-primary);
   font-family: var(--font-inter), sans-serif;
+  overflow-x: hidden;
+}
+
+html {
+  background: var(--bg-primary);
+  overflow-x: hidden;
 }
 
 .auth-bg {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import {
   CartesianGrid,
   Line,
@@ -30,8 +31,20 @@ export function RevenueChart({
   onCustomFromChange,
   onCustomToChange,
 }: RevenueChartProps) {
+  const [chartReady, setChartReady] = useState(false);
+
+  useEffect(() => {
+    const frame = window.requestAnimationFrame(() => {
+      setChartReady(true);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+    };
+  }, []);
+
   return (
-    <section className="glass-panel space-y-3 p-4">
+    <section className="glass-panel min-w-0 space-y-3 p-4">
       <div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
         <div>
           <h2 className="text-base font-semibold text-text-primary">Revenue Line Chart</h2>
@@ -82,9 +95,11 @@ export function RevenueChart({
         <p className="text-sm text-text-secondary">
           No hay puntos de ingresos para el rango seleccionado.
         </p>
+      ) : !chartReady ? (
+        <div className="h-72 rounded-xl border border-border bg-bg-elevated" />
       ) : (
-        <div className="h-72">
-          <ResponsiveContainer width="100%" height="100%">
+        <div className="h-72 min-w-0">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={288}>
             <LineChart data={points}>
               <CartesianGrid stroke="#2A2A3A" strokeDasharray="4 4" />
               <XAxis dataKey="date" stroke="#8888AA" tick={{ fontSize: 11 }} />

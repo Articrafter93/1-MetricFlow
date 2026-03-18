@@ -27,7 +27,7 @@ Antes de ejecutar una skill o tarea tecnica:
 
 1. Identificar fase del workflow (F1-F10).
 2. Confirmar ruta de trabajo del proyecto:
-   - `C:\Users\g-cub\Antigravity projects\playground\[proyecto]`
+   - `C:\Users\g-cub\Antigravity projects\proyectos\[proyecto]`
 3. Seleccionar KBs necesarias (minimo viable, no cargar todas).
 4. Declarar supuestos y riesgos antes de cambios irreversibles.
 5. Respetar GATE correspondiente cuando aplique.
@@ -145,3 +145,4 @@ Cualquier cambio futuro en `GEMINI.md` debe:
 2. Actualizar `Version` y `Fecha`.
 3. Regenerar `GEMINI.checksum`.
 4. Ser aprobado explicitamente por el developer.
+

@@ -1,7 +1,7 @@
 # ROTOS REPORT
 
 Fecha: 2026-03-07  
-Proyecto: `c:\Users\g-cub\Antigravity projects\playground\1- MetricFlow`
+Proyecto: `c:\Users\g-cub\Antigravity projects\proyectos\1- MetricFlow`
 
 ## Modo de ejecución
 - Script esperado por skill: `scripts/detect-dead-ui.ps1`
@@ -24,3 +24,4 @@ Proyecto: `c:\Users\g-cub\Antigravity projects\playground\1- MetricFlow`
 
 ## Estado final
 PASS
+
