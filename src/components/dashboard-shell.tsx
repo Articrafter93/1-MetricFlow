@@ -8,6 +8,7 @@ import {
   CreditCard,
   ChevronsLeftRightEllipsis,
   FileBarChart2,
+  Home,
   LogOut,
   Settings2,
   UserCog,
@@ -166,14 +167,24 @@ export function DashboardShell({
             })}
           </nav>
 
-          <button
-            type="button"
-            className="mt-8 flex items-center gap-2 rounded-xl border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary transition hover:border-danger hover:text-danger"
-            onClick={() => signOut({ callbackUrl: "/login" })}
-          >
-            <LogOut className="h-4 w-4" />
-            <span className={cn(collapsed && "hidden")}>Sign out</span>
-          </button>
+          <div className="mt-8 flex flex-col gap-2">
+            <Link
+              href="/"
+              className="flex items-center gap-2 rounded-xl border border-border bg-bg-surface px-3 py-2 text-sm text-text-secondary transition hover:border-accent hover:text-text-primary"
+              title="Inicio"
+            >
+              <Home className="h-4 w-4 shrink-0" />
+              <span className={cn(collapsed && "hidden")}>Inicio</span>
+            </Link>
+            <button
+              type="button"
+              className="flex items-center gap-2 rounded-xl border border-border bg-bg-elevated px-3 py-2 text-sm text-text-primary transition hover:border-danger hover:text-danger"
+              onClick={() => signOut({ callbackUrl: "/login" })}
+            >
+              <LogOut className="h-4 w-4 shrink-0" />
+              <span className={cn(collapsed && "hidden")}>Sign out</span>
+            </button>
+          </div>
         </aside>
 
         <main className="space-y-4">{children}</main>
